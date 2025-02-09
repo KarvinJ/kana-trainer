@@ -83,7 +83,7 @@ int main()
 
         soundTimer += GetFrameTime();
 
-        if (!isPracticeMode && soundTimer > 0.8 && (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && hasCollision))
+        if (!isPracticeMode && soundTimer > 0.6 && (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && hasCollision))
         {
             PlaySound(actualKana.sound);
             soundTimer = 0;
@@ -91,7 +91,9 @@ int main()
 
         BeginDrawing();
 
-        ClearBackground(Color{29, 29, 27, 255});
+        ClearBackground(BLACK);
+
+        DrawRectangleRounded({280, 0, 400, SCREEN_HEIGHT}, 0.2, 6, Color{29, 29, 27, 255});
 
         DrawRectangleRounded(actualKana.bounds, 0.3, 6, WHITE);
         DrawTexture(actualKana.texture, actualKana.bounds.x, actualKana.bounds.y, WHITE);
