@@ -12,25 +12,10 @@ typedef struct
     Sound sound;
 } Kana;
 
-int main()
+std::vector<Kana> loadAssets()
 {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Starter");
-    SetTargetFPS(60);
-
-    // bool isGamePaused = false;
-    bool isPracticeMode = false;
-
-    Rectangle mouseBounds = {0, 0, 8, 8};
-
-    // need to explicit define local variable values, if not I'll get a segmentation fault.
-    int actualKanaIndex = 0;
-    int score = 0;
-    float soundTimer = 0;
-    
     std::vector<Kana> kanas;
     kanas.reserve(5);
-
-    InitAudioDevice();
 
     std::string baseAudioPath = "assets/sounds/";
     std::string baseImagePath = "assets/img/";
@@ -52,6 +37,28 @@ int main()
 
         kanas.push_back({kanaBounds, actualTexture, actualSound});
     }
+
+    return kanas;
+}
+
+int main()
+{
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jap-Tester");
+    SetTargetFPS(60);
+
+    // bool isGamePaused = false;
+    bool isPracticeMode = false;
+
+    // need to explicit define local variable values, if not I'll get a segmentation fault.
+    int actualKanaIndex = 0;
+    int score = 0;
+    float soundTimer = 0;
+
+    InitAudioDevice();
+
+    std::vector<Kana> kanas = loadAssets();
+
+    Rectangle mouseBounds = {0, 0, 8, 8};
 
     while (!WindowShouldClose())
     {
@@ -100,18 +107,23 @@ int main()
 
         if (isPracticeMode)
         {
-            DrawText("Practice Mode", 400, 10, 20, WHITE);
+            DrawText("Practice Mode", 400, 10, 24, WHITE);
             DrawRectangle(SCREEN_WIDTH / 2 - 40, SCREEN_HEIGHT / 2, 70, 40, WHITE);
         }
         else
         {
-            DrawText(TextFormat("%i", score), SCREEN_WIDTH / 2, 10, 20, WHITE);
+            DrawText(TextFormat("%i", score), SCREEN_WIDTH / 2, 10, 24, WHITE);
         }
 
         EndDrawing();
     }
 
-    // UnloadTexture(kana.texture);
+    for (auto kana : kanas)
+    {
+        UnloadTexture(kana.texture);
+        UnloadSound(kana.sound);
+    }
+
     CloseAudioDevice();
     CloseWindow();
 }
