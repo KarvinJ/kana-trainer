@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <vector>
+#include <iostream>
 
 const int SCREEN_WIDTH = 960;
 const int SCREEN_HEIGHT = 544;
@@ -25,46 +26,32 @@ int main()
     int actualKanaIndex = 0;
     int score = 0;
     float soundTimer = 0;
-
+    
     std::vector<Kana> kanas;
-    kanas.reserve(4);
+    kanas.reserve(5);
 
     InitAudioDevice();
 
-    Sound kaSound = LoadSound("assets/sounds/ka.mp3");
-    Sound maSound = LoadSound("assets/sounds/ma.mp3");
-    Sound waSound = LoadSound("assets/sounds/wa.mp3");
-    Sound toSound = LoadSound("assets/sounds/to.mp3");
-    Sound aSound = LoadSound("assets/sounds/a.mp3");
+    std::string baseAudioPath = "assets/sounds/";
+    std::string baseImagePath = "assets/img/";
+    std::string audioExtension = ".mp3";
+    std::string imageExtension = ".png";
 
-    SetSoundVolume(kaSound, 0.4f);
-    SetSoundVolume(maSound, 0.4f);
-    SetSoundVolume(waSound, 0.4f);
-    SetSoundVolume(toSound, 0.4f);
-    SetSoundVolume(aSound, 0.4f);
+    std::vector<std::string> kanaNames = {"ka", "ma", "wa", "to", "a"};
 
-    Texture2D texture = LoadTexture("assets/img/ka.png");
-    Rectangle kanaBounds = {SCREEN_WIDTH / 3, 50, (float)texture.width, (float)texture.height};
+    for (std::string &kanaName : kanaNames)
+    {
+        std::string actualAudioPath = baseAudioPath + kanaName + audioExtension;
+        Sound actualSound = LoadSound(actualAudioPath.c_str());
+        SetSoundVolume(actualSound, 0.4f);
 
-    Kana kana = {kanaBounds, texture, kaSound};
+        std::string actualImagePath = baseImagePath + kanaName + imageExtension;
 
-    Texture2D texture2 = LoadTexture("assets/img/ma.png");
-    Kana kana2 = {kanaBounds, texture2, maSound};
+        Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
+        Rectangle kanaBounds = {SCREEN_WIDTH / 3, 50, (float)actualTexture.width, (float)actualTexture.height};
 
-    Texture2D sprite3 = LoadTexture("assets/img/wa.png");
-    Kana kana3 = {kanaBounds, sprite3, waSound};
-
-    Texture2D sprite4 = LoadTexture("assets/img/to.png");
-    Kana kana4 = {kanaBounds, sprite4, toSound};
-
-    Texture2D sprite5 = LoadTexture("assets/img/a.png");
-    Kana kana5 = {kanaBounds, sprite5, aSound};
-
-    kanas.push_back(kana);
-    kanas.push_back(kana2);
-    kanas.push_back(kana3);
-    kanas.push_back(kana4);
-    kanas.push_back(kana5);
+        kanas.push_back({kanaBounds, actualTexture, actualSound});
+    }
 
     while (!WindowShouldClose())
     {
@@ -86,6 +73,7 @@ int main()
         {
             score++;
             actualKanaIndex++;
+            // actualKanaIndex = GetRandomValue(0, 4);
 
             if (actualKanaIndex > 4)
             {
@@ -121,7 +109,7 @@ int main()
         EndDrawing();
     }
 
-    UnloadTexture(kana.texture);
+    // UnloadTexture(kana.texture);
     CloseAudioDevice();
     CloseWindow();
 }
