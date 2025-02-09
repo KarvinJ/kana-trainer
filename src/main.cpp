@@ -17,14 +17,25 @@ typedef struct
 std::vector<Kana> loadAssets()
 {
     std::vector<Kana> kanas;
-    kanas.reserve(5);
+    kanas.reserve(46);
 
     std::string baseAudioPath = "assets/sounds/";
     std::string baseImagePath = "assets/img/";
     std::string audioExtension = ".mp3";
     std::string imageExtension = ".png";
 
-    std::vector<std::string> kanaNames = {"ka", "ma", "wa", "to", "a"};
+    std::vector<std::string> kanaNames = {
+        "a", "e", "i", "o", "u", 
+        "ka", "ki", "ku", "ke", "ko",
+        "sa", "shi", "su", "se", "so",
+        "ta", "chi", "tsu", "te", "to",
+        "na", "ni", "nu", "ne", "no",
+        "ha", "hi", "fu", "he", "ho",
+        "ma", "mi", "mu", "me", "mo",
+        "ya", "yu", "yo",
+        "ra", "ri", "ru", "re", "ro",
+        "wa", "wo", "n"
+    };
 
     for (std::string &kanaName : kanaNames)
     {
@@ -58,6 +69,8 @@ int main()
     InitAudioDevice();
 
     std::vector<Kana> kanas = loadAssets();
+
+    int totalKanas = kanas.size() - 1;
 
     Rectangle mouseBounds = {0, 0, 8, 8};
 
@@ -140,7 +153,7 @@ int main()
                 // clearing the array.
                 name[0] = '\0';
                 letterCount = 0;
-                actualKanaIndex = GetRandomValue(0, 4);
+                actualKanaIndex = GetRandomValue(0, totalKanas);
                 score++;
                 PlaySound(actualKana.sound);
             }
@@ -148,7 +161,7 @@ int main()
             {
                 name[0] = '\0';
                 letterCount = 0;
-                actualKanaIndex = GetRandomValue(0, 4);
+                actualKanaIndex = GetRandomValue(0, totalKanas);
                 PlaySound(actualKana.sound);
             }
         }
@@ -169,7 +182,7 @@ int main()
         {
             actualKanaIndex++;
 
-            if (actualKanaIndex > 4)
+            if (actualKanaIndex == totalKanas)
             {
                 actualKanaIndex = 0;
             }
