@@ -62,7 +62,7 @@ int main()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jap-Tester");
     SetTargetFPS(60);
 
-    bool isLearningMode = true;
+    bool isLearningMode = false;
 
     // need to explicitly define local variable values, if not I'll get a segmentation fault.
     int actualKanaIndex = 0;
@@ -84,6 +84,10 @@ int main()
     bool isMouseOnTextBox = false;
 
     int framesCounter = 0;
+
+    float showMessageTimer = 0;
+    bool showMessage = false;
+    bool isAnswerCorrect = false;
 
     while (!WindowShouldClose())
     {
@@ -153,6 +157,7 @@ int main()
             actualKanaName.pop_back();
             if (actualKana.name.compare(actualKanaName) == 0)
             {
+                isAnswerCorrect = true;
                 // clearing the array.
                 name[0] = '\0';
                 letterCount = 0;
@@ -162,11 +167,14 @@ int main()
             }
             else
             {
+                isAnswerCorrect = false;
                 name[0] = '\0';
                 letterCount = 0;
                 actualKanaIndex = GetRandomValue(0, totalKanas);
                 PlaySound(actualKana.sound);
             }
+
+            showMessage = true;
         }
 
         if (IsKeyPressed(KEY_F1))
@@ -211,7 +219,9 @@ int main()
             }
         }
 
-        soundTimer += GetFrameTime();
+        float deltaTime = GetFrameTime();
+
+        soundTimer += deltaTime;
 
         if (isLearningMode && soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
         {
@@ -256,6 +266,27 @@ int main()
             }
 
             DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, DARKGRAY);
+
+            if (showMessage)
+            {
+                if (isAnswerCorrect)
+                {
+                    DrawText("CORRECT!", 425, 470, 20, LIME);
+                }
+                else
+                {
+
+                    DrawText("WRONG!", 440, 470, 20, RED);
+                }
+
+                showMessageTimer += deltaTime;
+
+                if (showMessageTimer > 1)
+                {
+                    showMessageTimer = 0;
+                    showMessage = false;
+                }
+            }
 
             if (isMouseOnTextBox)
             {
