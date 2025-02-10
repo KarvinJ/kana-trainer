@@ -30,7 +30,7 @@ std::vector<Kana> loadAssets()
         "gu", "ke", "ge", "ko", "go",
         "sa", "za", "shi", "ji", "su",
         "zu", "se", "ze", "so", "zo",
-        "ta", "da", "chi", "ji", "tsu",
+        "ta", "da", "chi", "ji2", "tsu",
         "zu2", "te", "de", "to", "do",
         "na", "ni", "nu", "ne", "no",
         "ha", "ba", "pa", "hi", "bi",
@@ -39,7 +39,8 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"};
+        "wa", "wo", "n"
+    };
 
     for (std::string &kanaName : kanaNames)
     {
