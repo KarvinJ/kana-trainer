@@ -3,7 +3,7 @@
 #include <iostream>
 #define MAX_INPUT_CHARS 4
 
-const int SCREEN_WIDTH = 960;
+const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 544;
 
 typedef struct
@@ -49,7 +49,7 @@ std::vector<Kana> loadAssets()
 
         std::string actualImagePath = baseImagePath + kanaName + imageExtension;
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
-        Rectangle kanaBounds = {SCREEN_WIDTH / 3, 50, (float)actualTexture.width, (float)actualTexture.height};
+        Rectangle kanaBounds = {40, 50, (float)actualTexture.width, (float)actualTexture.height};
 
         kanas.push_back({kanaName, kanaBounds, actualTexture, actualSound});
     }
@@ -100,7 +100,7 @@ int main()
     char answer[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
     int letterCount = 0;
 
-    Rectangle textBox = {SCREEN_WIDTH / 3 + 50, 400, 225, 50};
+    Rectangle textBox = {90, 400, 225, 50};
 
     int framesCounter = 0;
 
@@ -175,6 +175,7 @@ int main()
         if (IsKeyPressed(KEY_F1))
         {
             isLearningMode = !isLearningMode;
+            score = 0;
         }
 
         Vector2 mousePosition = GetMousePosition();
@@ -232,9 +233,7 @@ int main()
 
         BeginDrawing();
 
-        ClearBackground(BLACK);
-
-        DrawRectangleRounded({280, 0, 400, SCREEN_HEIGHT}, 0.2, 6, Color{29, 29, 27, 255});
+        ClearBackground(Color{29, 29, 27, 255});
 
         DrawRectangleRounded(actualKana.bounds, 0.3, 6, WHITE);
 
@@ -242,24 +241,22 @@ int main()
 
         if (isLearningMode)
         {
-            DrawText("Learning Mode", 400, 10, 24, WHITE);
+            DrawText("Learning Mode", 110, 10, 24, WHITE);
         }
         else
         {
-            DrawText(TextFormat("%i", score), SCREEN_WIDTH / 2, 10, 24, WHITE);
-            DrawRectangle(SCREEN_WIDTH / 2 - 40, SCREEN_HEIGHT / 2, 70, 40, WHITE);
+            DrawText(TextFormat("%i", score), 200, 10, 24, WHITE);
+            DrawRectangle(160, SCREEN_HEIGHT / 2, 70, 40, WHITE);
         }
 
         // drawing text box
         if (!isLearningMode)
         {
-            DrawText("WRITE THE ANSWER", 370, 375, 20, LIGHTGRAY);
+            DrawText("WRITE THE ANSWER", 90, 375, 20, LIGHTGRAY);
 
             DrawRectangleRec(textBox, LIGHTGRAY);
 
             DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
-
-            // DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
 
             DrawText(answer, (int)textBox.x + 5, (int)textBox.y + 8, 40, DARKGRAY);
 
@@ -267,11 +264,11 @@ int main()
             {
                 if (isAnswerCorrect)
                 {
-                    DrawText("CORRECT!", 425, 470, 20, LIME);
+                    DrawText("CORRECT!", 145, 470, 20, LIME);
                 }
                 else
                 {
-                    DrawText("WRONG!", 440, 470, 20, RED);
+                    DrawText("WRONG!", 160, 470, 20, RED);
                 }
 
                 showMessageTimer += deltaTime;
@@ -292,10 +289,6 @@ int main()
                 {
                     DrawText("_", (int)textBox.x + 8 + MeasureText(answer, 40), (int)textBox.y + 12, 40, DARKGRAY);
                 }
-            }
-            else
-            {
-                DrawText("This is the limit of text allowed", SCREEN_WIDTH / 3, 500, 20, GRAY);
             }
         }
 
