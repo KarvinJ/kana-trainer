@@ -57,6 +57,20 @@ std::vector<Kana> loadAssets()
     return kanas;
 }
 
+//me trae recuerdos de fundamentos de programacion
+void toLowerCase(std::string &string)
+{
+    // Manual converting each character to lowercase using ASCII values
+    for (char &character : string)
+    {
+        if (character >= 'A' && character <= 'Z')
+        {
+            // Convert uppercase to lowercase by adding 32
+            character += 32;
+        }
+    }
+}
+
 int main()
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jap-Tester");
@@ -65,7 +79,6 @@ int main()
     bool isLearningMode = false;
 
     // need to explicitly define local variable values, if not I'll get a segmentation fault.
-    int actualKanaIndex = 0;
     int score = 0;
     float soundTimer = 0;
 
@@ -75,13 +88,14 @@ int main()
 
     int totalKanas = kanas.size() - 1;
 
+    int actualKanaIndex = GetRandomValue(0, totalKanas);
+
     Rectangle mouseBounds = {0, 0, 8, 8};
 
     char name[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
     int letterCount = 0;
 
     Rectangle textBox = {SCREEN_WIDTH / 3 + 50, 400, 225, 50};
-    bool isMouseOnTextBox = false;
 
     int framesCounter = 0;
 
@@ -91,60 +105,33 @@ int main()
 
     while (!WindowShouldClose())
     {
-        if (CheckCollisionPointRec(GetMousePosition(), textBox))
-        {
-            isMouseOnTextBox = true;
-        }
-        else
-        {
-            isMouseOnTextBox = false;
-        }
+        // Get char pressed (unicode character) on the queue
+        int character = GetCharPressed();
 
-        if (isMouseOnTextBox)
+        // Check if more characters have been pressed on the same frame
+        while (character > 0)
         {
-            // Set the window's cursor to the I-Beam
-            SetMouseCursor(MOUSE_CURSOR_IBEAM);
-
-            // Get char pressed (unicode character) on the queue
-            int character = GetCharPressed();
-
-            // Check if more characters have been pressed on the same frame
-            while (character > 0)
+            // NOTE: Only allow keys in range [32..125]
+            if ((character >= 32) && (character <= 125) && (letterCount < MAX_INPUT_CHARS))
             {
-                // NOTE: Only allow keys in range [32..125]
-                if ((character >= 32) && (character <= 125) && (letterCount < MAX_INPUT_CHARS))
-                {
-                    name[letterCount] = (char)character;
-                    name[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
-                    letterCount++;
-                }
-
-                character = GetCharPressed(); // Check next character in the queue
+                name[letterCount] = (char)character;
+                name[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
+                letterCount++;
             }
 
-            if (IsKeyPressed(KEY_BACKSPACE))
+            character = GetCharPressed(); // Check next character in the queue
+        }
+
+        if (IsKeyPressed(KEY_BACKSPACE))
+        {
+            letterCount--;
+
+            if (letterCount < 0)
             {
-                letterCount--;
-                if (letterCount < 0)
-                {
-                    letterCount = 0;
-                }
-
-                name[letterCount] = '\0';
+                letterCount = 0;
             }
-        }
-        else
-        {
-            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-        }
 
-        if (isMouseOnTextBox)
-        {
-            framesCounter++;
-        }
-        else
-        {
-            framesCounter = 0;
+            name[letterCount] = '\0';
         }
 
         Kana actualKana = kanas[actualKanaIndex];
@@ -155,6 +142,9 @@ int main()
         {
             // removing the last character, that is always a blank space.
             actualKanaName.pop_back();
+            //always converting to lower case, in case anyone writes in uppercase.
+            toLowerCase(actualKanaName);
+
             if (actualKana.name.compare(actualKanaName) == 0)
             {
                 isAnswerCorrect = true;
@@ -252,18 +242,13 @@ int main()
         // drawing text box
         if (!isLearningMode)
         {
-            DrawText("PLACE MOUSE OVER INPUT BOX!", SCREEN_WIDTH / 3, 375, 20, LIGHTGRAY);
+            DrawText("WRITE THE ANSWER", 370, 375, 20, LIGHTGRAY);
 
             DrawRectangleRec(textBox, LIGHTGRAY);
 
-            if (isMouseOnTextBox)
-            {
-                DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, LIGHTGRAY);
-            }
-            else
-            {
-                DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
-            }
+            DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
+
+            // DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
 
             DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, DARKGRAY);
 
@@ -275,7 +260,6 @@ int main()
                 }
                 else
                 {
-
                     DrawText("WRONG!", 440, 470, 20, RED);
                 }
 
@@ -288,20 +272,19 @@ int main()
                 }
             }
 
-            if (isMouseOnTextBox)
+            framesCounter++;
+
+            if (letterCount < MAX_INPUT_CHARS)
             {
-                if (letterCount < MAX_INPUT_CHARS)
+                // Draw blinking underscore char
+                if (((framesCounter / 20) % 2) == 0)
                 {
-                    // Draw blinking underscore char
-                    if (((framesCounter / 20) % 2) == 0)
-                    {
-                        DrawText("_", (int)textBox.x + 8 + MeasureText(name, 40), (int)textBox.y + 12, 40, DARKGRAY);
-                    }
+                    DrawText("_", (int)textBox.x + 8 + MeasureText(name, 40), (int)textBox.y + 12, 40, DARKGRAY);
                 }
-                else
-                {
-                    DrawText("This is the limit of text allowed", SCREEN_WIDTH / 3, 500, 20, GRAY);
-                }
+            }
+            else
+            {
+                DrawText("This is the limit of text allowed", SCREEN_WIDTH / 3, 500, 20, GRAY);
             }
         }
 
