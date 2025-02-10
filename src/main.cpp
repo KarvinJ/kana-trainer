@@ -25,22 +25,21 @@ std::vector<Kana> loadAssets()
     std::string imageExtension = ".png";
 
     std::vector<std::string> kanaNames = {
-        "a", "e", "i", "o", "u", 
-        "ka", "ga", "ki", "gi", "ku", 
+        "a", "e", "i", "o", "u",
+        "ka", "ga", "ki", "gi", "ku",
         "gu", "ke", "ge", "ko", "go",
-        "sa", "za", "shi", "ji", "su", 
+        "sa", "za", "shi", "ji", "su",
         "zu", "se", "ze", "so", "zo",
-        "ta", "da", "chi", "ji", "tsu", 
+        "ta", "da", "chi", "ji", "tsu",
         "zu2", "te", "de", "to", "do",
         "na", "ni", "nu", "ne", "no",
-        "ha", "ba", "pa", "hi", "bi", 
-        "pi", "fu", "bu", "pu", "he", 
-        "be", "pe","ho", "bo", "po",
+        "ha", "ba", "pa", "hi", "bi",
+        "pi", "fu", "bu", "pu", "he",
+        "be", "pe", "ho", "bo", "po",
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"
-    };
+        "wa", "wo", "n"};
 
     for (std::string &kanaName : kanaNames)
     {
@@ -103,20 +102,20 @@ int main()
             SetMouseCursor(MOUSE_CURSOR_IBEAM);
 
             // Get char pressed (unicode character) on the queue
-            int key = GetCharPressed();
+            int character = GetCharPressed();
 
             // Check if more characters have been pressed on the same frame
-            while (key > 0)
+            while (character > 0)
             {
                 // NOTE: Only allow keys in range [32..125]
-                if ((key >= 32) && (key <= 125) && (letterCount < MAX_INPUT_CHARS))
+                if ((character >= 32) && (character <= 125) && (letterCount < MAX_INPUT_CHARS))
                 {
-                    name[letterCount] = (char)key;
+                    name[letterCount] = (char)character;
                     name[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
                     letterCount++;
                 }
 
-                key = GetCharPressed(); // Check next character in the queue
+                character = GetCharPressed(); // Check next character in the queue
             }
 
             if (IsKeyPressed(KEY_BACKSPACE))
@@ -148,7 +147,7 @@ int main()
 
         std::string actualKanaName = name;
 
-        if (IsKeyPressed(KEY_SPACE))
+        if (!isLearningMode && IsKeyPressed(KEY_SPACE))
         {
             // removing the last character, that is always a blank space.
             actualKanaName.pop_back();
@@ -170,7 +169,7 @@ int main()
             }
         }
 
-        if (IsKeyPressed(KEY_ENTER))
+        if (IsKeyPressed(KEY_F1))
         {
             isLearningMode = !isLearningMode;
         }
@@ -186,15 +185,35 @@ int main()
         {
             actualKanaIndex++;
 
-            if (actualKanaIndex == totalKanas)
+            if (actualKanaIndex > totalKanas)
             {
                 actualKanaIndex = 0;
             }
         }
 
+        if (isLearningMode && IsKeyPressed(KEY_RIGHT))
+        {
+            actualKanaIndex++;
+
+            if (actualKanaIndex > totalKanas)
+            {
+                actualKanaIndex = 0;
+            }
+        }
+
+        else if (isLearningMode && IsKeyPressed(KEY_LEFT))
+        {
+            actualKanaIndex--;
+
+            if (actualKanaIndex < 0)
+            {
+                actualKanaIndex = totalKanas;
+            }
+        }
+
         soundTimer += GetFrameTime();
 
-        if (isLearningMode && soundTimer > 0.6 && (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && hasCollision))
+        if (isLearningMode && soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
         {
             PlaySound(actualKana.sound);
             soundTimer = 0;
