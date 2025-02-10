@@ -17,7 +17,7 @@ typedef struct
 std::vector<Kana> loadAssets()
 {
     std::vector<Kana> kanas;
-    kanas.reserve(46);
+    kanas.reserve(71);
 
     std::string baseAudioPath = "assets/sounds/";
     std::string baseImagePath = "assets/img/";
@@ -26,11 +26,16 @@ std::vector<Kana> loadAssets()
 
     std::vector<std::string> kanaNames = {
         "a", "e", "i", "o", "u", 
-        "ka", "ki", "ku", "ke", "ko",
-        "sa", "shi", "su", "se", "so",
-        "ta", "chi", "tsu", "te", "to",
+        "ka", "ga", "ki", "gi", "ku", 
+        "gu", "ke", "ge", "ko", "go",
+        "sa", "za", "shi", "ji", "su", 
+        "zu", "se", "ze", "so", "zo",
+        "ta", "da", "chi", "ji", "tsu", 
+        "zu2", "te", "de", "to", "do",
         "na", "ni", "nu", "ne", "no",
-        "ha", "hi", "fu", "he", "ho",
+        "ha", "ba", "pa", "hi", "bi", 
+        "pi", "fu", "bu", "pu", "he", 
+        "be", "pe","ho", "bo", "po",
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
@@ -44,7 +49,6 @@ std::vector<Kana> loadAssets()
         SetSoundVolume(actualSound, 0.4f);
 
         std::string actualImagePath = baseImagePath + kanaName + imageExtension;
-
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {SCREEN_WIDTH / 3, 50, (float)actualTexture.width, (float)actualTexture.height};
 
@@ -59,7 +63,7 @@ int main()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jap-Tester");
     SetTargetFPS(60);
 
-    bool isLearningMode = false;
+    bool isLearningMode = true;
 
     // need to explicitly define local variable values, if not I'll get a segmentation fault.
     int actualKanaIndex = 0;
