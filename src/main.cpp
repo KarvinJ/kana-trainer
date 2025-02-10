@@ -1,7 +1,7 @@
 #include <raylib.h>
 #include <vector>
 #include <iostream>
-#define MAX_INPUT_CHARS 4
+#define MAX_INPUT_CHARS 3
 
 const int SCREEN_WIDTH = 960;
 const int SCREEN_HEIGHT = 544;
@@ -76,7 +76,7 @@ int main()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jap-Tester");
     SetTargetFPS(60);
 
-    bool isLearningMode = false;
+    bool isLearningMode = true;
 
     // need to explicitly define local variable values, if not I'll get a segmentation fault.
     int score = 0;
@@ -90,6 +90,11 @@ int main()
 
     int actualKanaIndex = GetRandomValue(0, totalKanas);
 
+    if (isLearningMode)
+    {
+        PlaySound(kanas[actualKanaIndex].sound); 
+    }
+    
     Rectangle mouseBounds = {0, 0, 8, 8};
 
     char name[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
@@ -197,6 +202,9 @@ int main()
             {
                 actualKanaIndex = 0;
             }
+
+            Kana nextKana = kanas[actualKanaIndex];
+            PlaySound(nextKana.sound);
         }
 
         else if (isLearningMode && IsKeyPressed(KEY_LEFT))
@@ -207,6 +215,9 @@ int main()
             {
                 actualKanaIndex = totalKanas;
             }
+
+            Kana nextKana = kanas[actualKanaIndex];
+            PlaySound(nextKana.sound);
         }
 
         float deltaTime = GetFrameTime();
