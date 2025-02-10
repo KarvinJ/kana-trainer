@@ -1,7 +1,7 @@
 #include <raylib.h>
 #include <vector>
 #include <iostream>
-#define MAX_INPUT_CHARS 3
+#define MAX_INPUT_CHARS 4
 
 const int SCREEN_WIDTH = 960;
 const int SCREEN_HEIGHT = 544;
@@ -97,7 +97,7 @@ int main()
     
     Rectangle mouseBounds = {0, 0, 8, 8};
 
-    char name[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
+    char answer[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
     int letterCount = 0;
 
     Rectangle textBox = {SCREEN_WIDTH / 3 + 50, 400, 225, 50};
@@ -119,8 +119,8 @@ int main()
             // NOTE: Only allow keys in range [32..125]
             if ((character >= 32) && (character <= 125) && (letterCount < MAX_INPUT_CHARS))
             {
-                name[letterCount] = (char)character;
-                name[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
+                answer[letterCount] = (char)character;
+                answer[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
                 letterCount++;
             }
 
@@ -136,12 +136,12 @@ int main()
                 letterCount = 0;
             }
 
-            name[letterCount] = '\0';
+            answer[letterCount] = '\0';
         }
 
         Kana actualKana = kanas[actualKanaIndex];
 
-        std::string actualKanaName = name;
+        std::string actualKanaName = answer;
 
         if (!isLearningMode && IsKeyPressed(KEY_SPACE))
         {
@@ -154,7 +154,7 @@ int main()
             {
                 isAnswerCorrect = true;
                 // clearing the array.
-                name[0] = '\0';
+                answer[0] = '\0';
                 letterCount = 0;
                 actualKanaIndex = GetRandomValue(0, totalKanas);
                 score++;
@@ -163,7 +163,7 @@ int main()
             else
             {
                 isAnswerCorrect = false;
-                name[0] = '\0';
+                answer[0] = '\0';
                 letterCount = 0;
                 actualKanaIndex = GetRandomValue(0, totalKanas);
                 PlaySound(actualKana.sound);
@@ -261,7 +261,7 @@ int main()
 
             // DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
 
-            DrawText(name, (int)textBox.x + 5, (int)textBox.y + 8, 40, DARKGRAY);
+            DrawText(answer, (int)textBox.x + 5, (int)textBox.y + 8, 40, DARKGRAY);
 
             if (showMessage)
             {
@@ -290,7 +290,7 @@ int main()
                 // Draw blinking underscore char
                 if (((framesCounter / 20) % 2) == 0)
                 {
-                    DrawText("_", (int)textBox.x + 8 + MeasureText(name, 40), (int)textBox.y + 12, 40, DARKGRAY);
+                    DrawText("_", (int)textBox.x + 8 + MeasureText(answer, 40), (int)textBox.y + 12, 40, DARKGRAY);
                 }
             }
             else
