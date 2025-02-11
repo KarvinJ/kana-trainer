@@ -1,6 +1,8 @@
 #include <raylib.h>
 #include <vector>
 #include <iostream>
+#include <fstream>
+
 #define MAX_INPUT_CHARS 4
 
 const int SCREEN_WIDTH = 400;
@@ -39,8 +41,7 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"
-    };
+        "wa", "wo", "n"};
 
     for (std::string &kanaName : kanaNames)
     {
@@ -58,7 +59,55 @@ std::vector<Kana> loadAssets()
     return kanas;
 }
 
-//me trae recuerdos de fundamentos de programacion
+void saveScore(int score)
+{
+    std::ofstream highScores("high-score.txt");
+
+    std::string scoreString = std::to_string(score);
+    // Write to the file
+    highScores << scoreString;
+
+    // Close the file
+    highScores.close();
+}
+
+int loadHighScore()
+{
+    std::string highScoreText;
+
+    // Read from the text file
+    std::ifstream highScores("high-score.txt");
+
+    // error! maybe the file doesn't exist
+    if (!highScores.is_open())
+    {
+        // if the file doesn't exist then lets create the file.
+        saveScore(0);
+
+        std::ifstream auxHighScores("high-score.txt");
+
+        getline(auxHighScores, highScoreText);
+
+        // Close the file
+        highScores.close();
+
+        int highScore = stoi(highScoreText);
+
+        return highScore;
+    }
+
+    // read the firstLine of the file and store the string data in my variable highScoreText.
+    getline(highScores, highScoreText);
+
+    // Close the file
+    highScores.close();
+
+    int highScore = stoi(highScoreText);
+
+    return highScore;
+}
+
+// me trae recuerdos de fundamentos de programacion
 void toLowerCase(std::string &string)
 {
     // Manual converting each character to lowercase using ASCII values
@@ -80,6 +129,7 @@ int main()
     bool isLearningMode = true;
 
     // need to explicitly define local variable values, if not I'll get a segmentation fault.
+    int highScore = loadHighScore();
     int score = 0;
     float soundTimer = 0;
 
@@ -93,9 +143,9 @@ int main()
 
     if (isLearningMode)
     {
-        PlaySound(kanas[actualKanaIndex].sound); 
+        PlaySound(kanas[actualKanaIndex].sound);
     }
-    
+
     Rectangle mouseBounds = {0, 0, 8, 8};
 
     char answer[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
@@ -148,8 +198,15 @@ int main()
         {
             // removing the last character, that is always a blank space.
             actualKanaName.pop_back();
-            //always converting to lower case, in case anyone writes in uppercase.
+            // always converting to lower case, in case anyone writes in uppercase.
             toLowerCase(actualKanaName);
+
+            // removing actual kana
+            if (totalKanas > 0)
+            {
+                kanas.erase(kanas.begin() + actualKanaIndex);
+                totalKanas--;
+            }
 
             if (actualKana.name.compare(actualKanaName) == 0)
             {
@@ -171,6 +228,22 @@ int main()
             }
 
             showMessage = true;
+
+            if (totalKanas == 0)
+            {
+                kanas.clear();
+                kanas = loadAssets();
+                totalKanas = kanas.size() - 1;
+
+                isLearningMode = true;
+
+                if (score > highScore)
+                {
+                    highScore = score;
+                    score = 0;
+                    saveScore(highScore);
+                }
+            }
         }
 
         if (IsKeyPressed(KEY_F1))
@@ -246,6 +319,7 @@ int main()
         }
         else
         {
+            DrawText(TextFormat("%i", highScore), 40, 10, 24, WHITE);
             DrawText(TextFormat("%i", score), 200, 10, 24, WHITE);
             DrawRectangle(160, SCREEN_HEIGHT / 2, 70, 40, WHITE);
         }
