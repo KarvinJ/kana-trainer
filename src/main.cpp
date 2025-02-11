@@ -46,7 +46,7 @@ std::vector<Kana> loadAssets()
     {
         std::string actualAudioPath = baseAudioPath + kanaName + audioExtension;
         Sound actualSound = LoadSound(actualAudioPath.c_str());
-        SetSoundVolume(actualSound, 0.4);
+        SetSoundVolume(actualSound, 0.8);
 
         std::string actualImagePath = baseImagePath + kanaName + imageExtension;
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
