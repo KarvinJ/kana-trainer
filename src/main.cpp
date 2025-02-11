@@ -61,13 +61,12 @@ std::vector<Kana> loadAssets()
 
 void saveScore(int score)
 {
-    std::ofstream highScores("high-score.txt");
+    std::ofstream highScores("assets/high-score.txt");
 
     std::string scoreString = std::to_string(score);
-    // Write to the file
+
     highScores << scoreString;
 
-    // Close the file
     highScores.close();
 }
 
@@ -75,20 +74,16 @@ int loadHighScore()
 {
     std::string highScoreText;
 
-    // Read from the text file
-    std::ifstream highScores("high-score.txt");
+    std::ifstream highScores("assets/high-score.txt");
 
-    // error! maybe the file doesn't exist
     if (!highScores.is_open())
     {
-        // if the file doesn't exist then lets create the file.
         saveScore(0);
 
-        std::ifstream auxHighScores("high-score.txt");
+        std::ifstream auxHighScores("assets/high-score.txt");
 
         getline(auxHighScores, highScoreText);
 
-        // Close the file
         highScores.close();
 
         int highScore = stoi(highScoreText);
@@ -96,10 +91,8 @@ int loadHighScore()
         return highScore;
     }
 
-    // read the firstLine of the file and store the string data in my variable highScoreText.
     getline(highScores, highScoreText);
 
-    // Close the file
     highScores.close();
 
     int highScore = stoi(highScoreText);
@@ -128,9 +121,11 @@ int main()
 
     bool isLearningMode = true;
 
-    // need to explicitly define local variable values, if not I'll get a segmentation fault.
     int highScore = loadHighScore();
+
+    // need to explicitly define local variable values, if not I'll get a segmentation fault.
     int score = 0;
+    float gameTimer = 100;
     float soundTimer = 0;
 
     InitAudioDevice();
@@ -190,6 +185,26 @@ int main()
             answer[letterCount] = '\0';
         }
 
+        // if (gameTimer < 1)
+        // {
+        //     kanas.clear();
+        //     kanas = loadAssets();
+        //     totalKanas = kanas.size() - 1;
+
+        //     isLearningMode = true;
+
+        //     score *= gameTimer;
+
+        //     if (score > highScore)
+        //     {
+        //         highScore = score;
+        //         saveScore(highScore);
+
+        //         gameTimer = 100;
+        //         score = 0;
+        //     }
+        // }
+
         Kana actualKana = kanas[actualKanaIndex];
 
         std::string actualKanaName = answer;
@@ -215,7 +230,7 @@ int main()
                 answer[0] = '\0';
                 letterCount = 0;
                 actualKanaIndex = GetRandomValue(0, totalKanas);
-                score++;
+                score += 10;
                 PlaySound(actualKana.sound);
             }
             else
@@ -237,11 +252,15 @@ int main()
 
                 isLearningMode = true;
 
+                // score *= gameTimer;
+
                 if (score > highScore)
                 {
                     highScore = score;
-                    score = 0;
                     saveScore(highScore);
+
+                    gameTimer = 100;
+                    score = 0;
                 }
             }
         }
@@ -250,6 +269,7 @@ int main()
         {
             isLearningMode = !isLearningMode;
             score = 0;
+            gameTimer = 100;
         }
 
         Vector2 mousePosition = GetMousePosition();
@@ -319,6 +339,11 @@ int main()
         }
         else
         {
+            // if (gameTimer > 0)
+            // {
+            //     gameTimer -= deltaTime;
+            // }
+
             DrawText(TextFormat("%i", highScore), 40, 10, 24, WHITE);
             DrawText(TextFormat("%i", score), 200, 10, 24, WHITE);
             DrawRectangle(160, SCREEN_HEIGHT / 2, 70, 40, WHITE);
