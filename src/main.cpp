@@ -7,6 +7,13 @@
 
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 544;
+const int MAX_GAME_TIME = 180;
+
+float gameTimer = MAX_GAME_TIME;
+
+bool isLearningMode = true;
+int score = 0;
+int highScore = 0;
 
 typedef struct
 {
@@ -59,7 +66,7 @@ std::vector<Kana> loadAssets()
     return kanas;
 }
 
-void saveScore(int score)
+void saveScore()
 {
     std::ofstream highScores("assets/high-score.txt");
 
@@ -78,7 +85,7 @@ int loadHighScore()
 
     if (!highScores.is_open())
     {
-        saveScore(0);
+        saveScore();
 
         std::ifstream auxHighScores("assets/high-score.txt");
 
@@ -100,6 +107,22 @@ int loadHighScore()
     return highScore;
 }
 
+void resetGame()
+{
+    isLearningMode = true;
+
+    score *= gameTimer;
+
+    if (score > highScore)
+    {
+        highScore = score;
+        saveScore();
+
+        gameTimer = MAX_GAME_TIME;
+        score = 0;
+    }
+}
+
 // me trae recuerdos de fundamentos de programacion
 void toLowerCase(std::string &string)
 {
@@ -119,13 +142,9 @@ int main()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jap-Tester");
     SetTargetFPS(60);
 
-    bool isLearningMode = true;
-
-    int highScore = loadHighScore();
+    highScore = loadHighScore();
 
     // need to explicitly define local variable values, if not I'll get a segmentation fault.
-    int score = 0;
-    float gameTimer = 100;
     float soundTimer = 0;
 
     InitAudioDevice();
@@ -185,25 +204,14 @@ int main()
             answer[letterCount] = '\0';
         }
 
-        // if (gameTimer < 1)
-        // {
-        //     kanas.clear();
-        //     kanas = loadAssets();
-        //     totalKanas = kanas.size() - 1;
+        if (gameTimer < 1)
+        {
+            kanas.clear();
+            kanas = loadAssets();
+            totalKanas = kanas.size() - 1;
 
-        //     isLearningMode = true;
-
-        //     score *= gameTimer;
-
-        //     if (score > highScore)
-        //     {
-        //         highScore = score;
-        //         saveScore(highScore);
-
-        //         gameTimer = 100;
-        //         score = 0;
-        //     }
-        // }
+            resetGame();
+        }
 
         Kana actualKana = kanas[actualKanaIndex];
 
@@ -230,7 +238,7 @@ int main()
                 answer[0] = '\0';
                 letterCount = 0;
                 actualKanaIndex = GetRandomValue(0, totalKanas);
-                score += 10;
+                score++;
                 PlaySound(actualKana.sound);
             }
             else
@@ -250,18 +258,20 @@ int main()
                 kanas = loadAssets();
                 totalKanas = kanas.size() - 1;
 
-                isLearningMode = true;
+                resetGame();
+
+                // isLearningMode = true;
 
                 // score *= gameTimer;
 
-                if (score > highScore)
-                {
-                    highScore = score;
-                    saveScore(highScore);
+                // if (score > highScore)
+                // {
+                //     highScore = score;
+                //     saveScore(highScore);
 
-                    gameTimer = 100;
-                    score = 0;
-                }
+                //     gameTimer = MAX_GAME_TIME;
+                //     score = 0;
+                // }
             }
         }
 
@@ -269,7 +279,7 @@ int main()
         {
             isLearningMode = !isLearningMode;
             score = 0;
-            gameTimer = 100;
+            gameTimer = MAX_GAME_TIME;
         }
 
         Vector2 mousePosition = GetMousePosition();
@@ -277,9 +287,7 @@ int main()
         mouseBounds.x = mousePosition.x;
         mouseBounds.y = mousePosition.y;
 
-        bool hasCollision = CheckCollisionRecs(mouseBounds, actualKana.bounds);
-
-        if (isLearningMode && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && hasCollision)
+        if (isLearningMode && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, actualKana.bounds))
         {
             actualKanaIndex++;
 
@@ -287,6 +295,9 @@ int main()
             {
                 actualKanaIndex = 0;
             }
+
+            Kana nextKana = kanas[actualKanaIndex];
+            PlaySound(nextKana.sound);
         }
 
         if (isLearningMode && IsKeyPressed(KEY_RIGHT))
@@ -339,13 +350,14 @@ int main()
         }
         else
         {
-            // if (gameTimer > 0)
-            // {
-            //     gameTimer -= deltaTime;
-            // }
+            if (gameTimer > 0)
+            {
+                gameTimer -= deltaTime;
+            }
 
-            DrawText(TextFormat("%i", highScore), 40, 10, 24, WHITE);
+            DrawText(TextFormat("%i", (int)gameTimer), SCREEN_WIDTH - 40, 10, 24, WHITE);
             DrawText(TextFormat("%i", score), 200, 10, 24, WHITE);
+            DrawText(TextFormat("%i", highScore), 20, 10, 24, WHITE);
             DrawRectangle(160, SCREEN_HEIGHT / 2, 70, 40, WHITE);
         }
 
