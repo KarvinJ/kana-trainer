@@ -165,7 +165,7 @@ int main()
     char answer[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
     int letterCount = 0;
 
-    Rectangle textBox = {90, 400, 225, 50};
+    Rectangle textBoxBounds = {90, 400, 225, 50};
 
     int framesCounter = 0;
 
@@ -175,105 +175,9 @@ int main()
 
     while (!WindowShouldClose())
     {
-        // Get char pressed (unicode character) on the queue
-        int character = GetCharPressed();
-
-        // Check if more characters have been pressed on the same frame
-        while (character > 0)
-        {
-            // NOTE: Only allow keys in range [32..125]
-            if ((character >= 32) && (character <= 125) && (letterCount < MAX_INPUT_CHARS))
-            {
-                answer[letterCount] = (char)character;
-                answer[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
-                letterCount++;
-            }
-
-            character = GetCharPressed(); // Check next character in the queue
-        }
-
-        if (IsKeyPressed(KEY_BACKSPACE))
-        {
-            letterCount--;
-
-            if (letterCount < 0)
-            {
-                letterCount = 0;
-            }
-
-            answer[letterCount] = '\0';
-        }
-
-        if (gameTimer < 1)
-        {
-            kanas.clear();
-            kanas = loadAssets();
-            totalKanas = kanas.size() - 1;
-
-            resetGame();
-        }
+        float deltaTime = GetFrameTime();
 
         Kana actualKana = kanas[actualKanaIndex];
-
-        std::string actualKanaName = answer;
-
-        if (!isLearningMode && IsKeyPressed(KEY_SPACE))
-        {
-            // removing the last character, that is always a blank space.
-            actualKanaName.pop_back();
-            // always converting to lower case, in case anyone writes in uppercase.
-            toLowerCase(actualKanaName);
-
-            // removing actual kana
-            if (totalKanas > 0)
-            {
-                kanas.erase(kanas.begin() + actualKanaIndex);
-                totalKanas--;
-            }
-
-            if (actualKana.name.compare(actualKanaName) == 0)
-            {
-                isAnswerCorrect = true;
-                // clearing the array.
-                answer[0] = '\0';
-                letterCount = 0;
-                actualKanaIndex = GetRandomValue(0, totalKanas);
-                score++;
-                PlaySound(actualKana.sound);
-            }
-            else
-            {
-                isAnswerCorrect = false;
-                answer[0] = '\0';
-                letterCount = 0;
-                actualKanaIndex = GetRandomValue(0, totalKanas);
-                PlaySound(actualKana.sound);
-            }
-
-            showMessage = true;
-
-            if (totalKanas == 0)
-            {
-                kanas.clear();
-                kanas = loadAssets();
-                totalKanas = kanas.size() - 1;
-
-                resetGame();
-
-                // isLearningMode = true;
-
-                // score *= gameTimer;
-
-                // if (score > highScore)
-                // {
-                //     highScore = score;
-                //     saveScore(highScore);
-
-                //     gameTimer = MAX_GAME_TIME;
-                //     score = 0;
-                // }
-            }
-        }
 
         if (IsKeyPressed(KEY_F1))
         {
@@ -282,58 +186,147 @@ int main()
             gameTimer = MAX_GAME_TIME;
         }
 
-        Vector2 mousePosition = GetMousePosition();
-
-        mouseBounds.x = mousePosition.x;
-        mouseBounds.y = mousePosition.y;
-
-        if (isLearningMode && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, actualKana.bounds))
+        if (!isLearningMode)
         {
-            actualKanaIndex++;
+            // Get char pressed (unicode character) on the queue
+            int character = GetCharPressed();
 
-            if (actualKanaIndex > totalKanas)
+            // Check if more characters have been pressed on the same frame
+            while (character > 0)
             {
-                actualKanaIndex = 0;
+                // NOTE: Only allow keys in range [32..125]
+                if ((character >= 32) && (character <= 125) && (letterCount < MAX_INPUT_CHARS))
+                {
+                    answer[letterCount] = (char)character;
+                    answer[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
+                    letterCount++;
+                }
+
+                character = GetCharPressed(); // Check next character in the queue
             }
 
-            Kana nextKana = kanas[actualKanaIndex];
-            PlaySound(nextKana.sound);
-        }
-
-        if (isLearningMode && IsKeyPressed(KEY_RIGHT))
-        {
-            actualKanaIndex++;
-
-            if (actualKanaIndex > totalKanas)
+            if (IsKeyPressed(KEY_BACKSPACE))
             {
-                actualKanaIndex = 0;
+                letterCount--;
+
+                if (letterCount < 0)
+                {
+                    letterCount = 0;
+                }
+
+                answer[letterCount] = '\0';
             }
 
-            Kana nextKana = kanas[actualKanaIndex];
-            PlaySound(nextKana.sound);
+            if (gameTimer < 1)
+            {
+                kanas.clear();
+                kanas = loadAssets();
+                totalKanas = kanas.size() - 1;
+    
+                resetGame();
+            }
+    
+            std::string actualKanaName = answer;
+    
+            if (IsKeyPressed(KEY_SPACE))
+            {
+                // removing the last character, that is always a blank space.
+                actualKanaName.pop_back();
+                // always converting to lower case, in case anyone writes in uppercase.
+                toLowerCase(actualKanaName);
+    
+                // removing actual kana
+                if (totalKanas > 0)
+                {
+                    kanas.erase(kanas.begin() + actualKanaIndex);
+                    totalKanas--;
+                }
+    
+                if (actualKana.name.compare(actualKanaName) == 0)
+                {
+                    isAnswerCorrect = true;
+                    // clearing the array.
+                    answer[0] = '\0';
+                    letterCount = 0;
+                    actualKanaIndex = GetRandomValue(0, totalKanas);
+                    score++;
+                    PlaySound(actualKana.sound);
+                }
+                else
+                {
+                    isAnswerCorrect = false;
+                    answer[0] = '\0';
+                    letterCount = 0;
+                    actualKanaIndex = GetRandomValue(0, totalKanas);
+                    PlaySound(actualKana.sound);
+                }
+    
+                showMessage = true;
+    
+                if (totalKanas == 0)
+                {
+                    kanas.clear();
+                    kanas = loadAssets();
+                    totalKanas = kanas.size() - 1;
+    
+                    resetGame();
+                }
+            }
         }
 
-        else if (isLearningMode && IsKeyPressed(KEY_LEFT))
-        {
-            actualKanaIndex--;
+        else {
 
-            if (actualKanaIndex < 0)
+            Vector2 mousePosition = GetMousePosition();
+    
+            mouseBounds.x = mousePosition.x;
+            mouseBounds.y = mousePosition.y;
+    
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, actualKana.bounds))
             {
-                actualKanaIndex = totalKanas;
+                actualKanaIndex++;
+    
+                if (actualKanaIndex > totalKanas)
+                {
+                    actualKanaIndex = 0;
+                }
+    
+                Kana nextKana = kanas[actualKanaIndex];
+                PlaySound(nextKana.sound);
+            }
+    
+            if (IsKeyPressed(KEY_RIGHT))
+            {
+                actualKanaIndex++;
+    
+                if (actualKanaIndex > totalKanas)
+                {
+                    actualKanaIndex = 0;
+                }
+    
+                Kana nextKana = kanas[actualKanaIndex];
+                PlaySound(nextKana.sound);
+            }
+    
+            else if (IsKeyPressed(KEY_LEFT))
+            {
+                actualKanaIndex--;
+    
+                if (actualKanaIndex < 0)
+                {
+                    actualKanaIndex = totalKanas;
+                }
+    
+                Kana nextKana = kanas[actualKanaIndex];
+                PlaySound(nextKana.sound);
             }
 
-            Kana nextKana = kanas[actualKanaIndex];
-            PlaySound(nextKana.sound);
-        }
-
-        float deltaTime = GetFrameTime();
-
-        soundTimer += deltaTime;
-
-        if (isLearningMode && soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
-        {
-            PlaySound(actualKana.sound);
-            soundTimer = 0;
+            soundTimer += deltaTime;
+    
+            if (soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
+            {
+                PlaySound(actualKana.sound);
+                soundTimer = 0;
+            }
         }
 
         BeginDrawing();
@@ -359,18 +352,15 @@ int main()
             DrawText(TextFormat("%i", score), 200, 10, 24, WHITE);
             DrawText(TextFormat("%i", highScore), 20, 10, 24, WHITE);
             DrawRectangle(160, SCREEN_HEIGHT / 2, 70, 40, WHITE);
-        }
 
-        // drawing text box
-        if (!isLearningMode)
-        {
+            // drawing text box
             DrawText("WRITE THE ANSWER", 90, 375, 20, LIGHTGRAY);
 
-            DrawRectangleRec(textBox, LIGHTGRAY);
+            DrawRectangleRec(textBoxBounds, LIGHTGRAY);
 
-            DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
+            DrawRectangleLines((int)textBoxBounds.x, (int)textBoxBounds.y, (int)textBoxBounds.width, (int)textBoxBounds.height, DARKGRAY);
 
-            DrawText(answer, (int)textBox.x + 5, (int)textBox.y + 8, 40, DARKGRAY);
+            DrawText(answer, (int)textBoxBounds.x + 5, (int)textBoxBounds.y + 8, 40, DARKGRAY);
 
             if (showMessage)
             {
@@ -399,7 +389,7 @@ int main()
                 // Draw blinking underscore char
                 if (((framesCounter / 20) % 2) == 0)
                 {
-                    DrawText("_", (int)textBox.x + 8 + MeasureText(answer, 40), (int)textBox.y + 12, 40, DARKGRAY);
+                    DrawText("_", (int)textBoxBounds.x + 8 + MeasureText(answer, 40), (int)textBoxBounds.y + 12, 40, DARKGRAY);
                 }
             }
         }
