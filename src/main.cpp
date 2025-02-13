@@ -7,11 +7,10 @@
 
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 544;
-const int MAX_GAME_TIME = 180;
+const int MAX_GAME_TIME = 60;
 
 float gameTimer = MAX_GAME_TIME;
 
-bool isLearningMode = true;
 int score = 0;
 int highScore = 0;
 
@@ -109,8 +108,6 @@ int loadHighScore()
 
 void resetGame()
 {
-    isLearningMode = true;
-
     score *= gameTimer;
 
     if (score > highScore)
@@ -144,6 +141,8 @@ int main()
 
     highScore = loadHighScore();
 
+    int attempts = 0;
+
     // need to explicitly define local variable values, if not I'll get a segmentation fault.
     float soundTimer = 0;
 
@@ -154,6 +153,8 @@ int main()
     int totalKanas = kanas.size() - 1;
 
     int actualKanaIndex = GetRandomValue(0, totalKanas);
+
+    bool isLearningMode = true;
 
     if (isLearningMode)
     {
@@ -219,29 +220,20 @@ int main()
 
             if (gameTimer < 1)
             {
-                kanas.clear();
-                kanas = loadAssets();
-                totalKanas = kanas.size() - 1;
-    
+                isLearningMode = true;
+                attempts = 0;
                 resetGame();
             }
-    
+
             std::string actualKanaName = answer;
-    
+
             if (IsKeyPressed(KEY_SPACE))
             {
                 // removing the last character, that is always a blank space.
                 actualKanaName.pop_back();
                 // always converting to lower case, in case anyone writes in uppercase.
                 toLowerCase(actualKanaName);
-    
-                // removing actual kana
-                if (totalKanas > 0)
-                {
-                    kanas.erase(kanas.begin() + actualKanaIndex);
-                    totalKanas--;
-                }
-    
+
                 if (actualKana.name.compare(actualKanaName) == 0)
                 {
                     isAnswerCorrect = true;
@@ -260,68 +252,68 @@ int main()
                     actualKanaIndex = GetRandomValue(0, totalKanas);
                     PlaySound(actualKana.sound);
                 }
-    
+
                 showMessage = true;
-    
-                if (totalKanas == 0)
+
+                attempts++;
+                if (attempts == 20)
                 {
-                    kanas.clear();
-                    kanas = loadAssets();
-                    totalKanas = kanas.size() - 1;
-    
+                    isLearningMode = true;
+                    attempts = 0;
                     resetGame();
                 }
             }
         }
 
-        else {
+        else
+        {
 
             Vector2 mousePosition = GetMousePosition();
-    
+
             mouseBounds.x = mousePosition.x;
             mouseBounds.y = mousePosition.y;
-    
+
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, actualKana.bounds))
             {
                 actualKanaIndex++;
-    
+
                 if (actualKanaIndex > totalKanas)
                 {
                     actualKanaIndex = 0;
                 }
-    
+
                 Kana nextKana = kanas[actualKanaIndex];
                 PlaySound(nextKana.sound);
             }
-    
+
             if (IsKeyPressed(KEY_RIGHT))
             {
                 actualKanaIndex++;
-    
+
                 if (actualKanaIndex > totalKanas)
                 {
                     actualKanaIndex = 0;
                 }
-    
+
                 Kana nextKana = kanas[actualKanaIndex];
                 PlaySound(nextKana.sound);
             }
-    
+
             else if (IsKeyPressed(KEY_LEFT))
             {
                 actualKanaIndex--;
-    
+
                 if (actualKanaIndex < 0)
                 {
                     actualKanaIndex = totalKanas;
                 }
-    
+
                 Kana nextKana = kanas[actualKanaIndex];
                 PlaySound(nextKana.sound);
             }
 
             soundTimer += deltaTime;
-    
+
             if (soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
             {
                 PlaySound(actualKana.sound);
