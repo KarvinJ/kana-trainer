@@ -47,7 +47,8 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"};
+        "wa", "wo", "n"
+    };
 
     for (std::string &kanaName : kanaNames)
     {
@@ -184,6 +185,7 @@ int main()
         {
             isLearningMode = !isLearningMode;
             score = 0;
+            attempts = 0;
             gameTimer = MAX_GAME_TIME;
         }
 
