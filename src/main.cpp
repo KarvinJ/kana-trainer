@@ -38,8 +38,8 @@ std::vector<Kana> loadAssets()
         "gu", "ke", "ge", "ko", "go",
         "sa", "za", "shi", "ji", "su",
         "zu", "se", "ze", "so", "zo",
-        "ta", "da", "chi", "ji2", "tsu",
-        "zu2", "te", "de", "to", "do",
+        "ta", "da", "chi", "di", "tsu",
+        "du", "te", "de", "to", "do",
         "na", "ni", "nu", "ne", "no",
         "ha", "ba", "pa", "hi", "bi",
         "pi", "fu", "bu", "pu", "he",
@@ -139,6 +139,13 @@ int main()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jap-Tester");
     SetTargetFPS(60);
 
+    Texture2D soundIconTexture = LoadTexture("assets/icons/sound-icon.png");
+    Rectangle soundIconBounds = {SCREEN_WIDTH - 32, 10, (float)soundIconTexture.width, (float)soundIconTexture.height};
+
+    Texture2D muteIconTexture = LoadTexture("assets/icons/mute-icon.png");
+
+    bool isMute = false;
+
     highScore = loadHighScore();
 
     int attempts = 0;
@@ -191,8 +198,6 @@ int main()
             answer[0] = '\0';
             letterCount = 0;
             actualKanaIndex = GetRandomValue(0, totalKanas);
-
-            showScoreTimer = 0;
         }
 
         if (!isLearningMode)
@@ -251,7 +256,6 @@ int main()
                     letterCount = 0;
                     actualKanaIndex = GetRandomValue(0, totalKanas);
                     score++;
-                    PlaySound(actualKana.sound);
                 }
                 else
                 {
@@ -259,9 +263,13 @@ int main()
                     answer[0] = '\0';
                     letterCount = 0;
                     actualKanaIndex = GetRandomValue(0, totalKanas);
-                    PlaySound(actualKana.sound);
                 }
 
+                if (!isMute)
+                {
+                    PlaySound(actualKana.sound);
+                }
+                
                 showMessage = true;
 
                 attempts++;
@@ -283,6 +291,11 @@ int main()
             mouseBounds.x = mousePosition.x;
             mouseBounds.y = mousePosition.y;
 
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, soundIconBounds))
+            {
+                isMute = !isMute;
+            }
+
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, actualKana.bounds))
             {
                 actualKanaIndex++;
@@ -292,8 +305,11 @@ int main()
                     actualKanaIndex = 0;
                 }
 
-                Kana nextKana = kanas[actualKanaIndex];
-                PlaySound(nextKana.sound);
+                if (!isMute)
+                {
+                    Kana nextKana = kanas[actualKanaIndex];
+                    PlaySound(nextKana.sound);
+                }
             }
 
             if (IsKeyPressed(KEY_RIGHT))
@@ -305,8 +321,11 @@ int main()
                     actualKanaIndex = 0;
                 }
 
-                Kana nextKana = kanas[actualKanaIndex];
-                PlaySound(nextKana.sound);
+                if (!isMute)
+                {
+                    Kana nextKana = kanas[actualKanaIndex];
+                    PlaySound(nextKana.sound);
+                }
             }
 
             else if (IsKeyPressed(KEY_LEFT))
@@ -318,16 +337,22 @@ int main()
                     actualKanaIndex = totalKanas;
                 }
 
-                Kana nextKana = kanas[actualKanaIndex];
-                PlaySound(nextKana.sound);
+                if (!isMute)
+                {
+                    Kana nextKana = kanas[actualKanaIndex];
+                    PlaySound(nextKana.sound);
+                }
             }
 
-            soundTimer += deltaTime;
-
-            if (soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
+            if (!isMute)
             {
-                PlaySound(actualKana.sound);
-                soundTimer = 0;
+                soundTimer += deltaTime;
+
+                if (soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
+                {
+                    PlaySound(actualKana.sound);
+                    soundTimer = 0;
+                }
             }
         }
 
@@ -336,12 +361,22 @@ int main()
         ClearBackground(Color{29, 29, 27, 255});
 
         DrawRectangleRounded(actualKana.bounds, 0.3, 6, WHITE);
-
         DrawTexture(actualKana.texture, actualKana.bounds.x, actualKana.bounds.y, WHITE);
 
         if (isLearningMode)
         {
             DrawText("Learning mode", 110, 10, 24, LIGHTGRAY);
+
+            if (!isMute)
+            {
+                DrawRectangleRounded(soundIconBounds, 0.3, 6, DARKGRAY);
+                DrawTexture(soundIconTexture, soundIconBounds.x, soundIconBounds.y, WHITE);
+            }
+            else
+            {
+                DrawRectangleRounded(soundIconBounds, 0.3, 6, DARKGRAY);
+                DrawTexture(muteIconTexture, soundIconBounds.x, soundIconBounds.y, WHITE);
+            }
 
             if (showScoreTimer < 5 && highScore > 0)
             {
