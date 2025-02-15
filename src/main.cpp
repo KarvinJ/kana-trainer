@@ -47,8 +47,7 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"
-    };
+        "wa", "wo", "n"};
 
     for (std::string &kanaName : kanaNames)
     {
@@ -146,6 +145,7 @@ int main()
 
     // need to explicitly define local variable values, if not I'll get a segmentation fault.
     float soundTimer = 0;
+    float showScoreTimer = 5;
 
     InitAudioDevice();
 
@@ -181,12 +181,18 @@ int main()
 
         Kana actualKana = kanas[actualKanaIndex];
 
-        if (IsKeyPressed(KEY_F1))
+        if (IsKeyPressed(KEY_ENTER))
         {
             isLearningMode = !isLearningMode;
             score = 0;
             attempts = 0;
             gameTimer = MAX_GAME_TIME;
+
+            answer[0] = '\0';
+            letterCount = 0;
+            actualKanaIndex = GetRandomValue(0, totalKanas);
+
+            showScoreTimer = 0;
         }
 
         if (!isLearningMode)
@@ -224,6 +230,7 @@ int main()
             {
                 isLearningMode = true;
                 attempts = 0;
+                showScoreTimer = 0;
                 resetGame();
             }
 
@@ -258,10 +265,12 @@ int main()
                 showMessage = true;
 
                 attempts++;
+
                 if (attempts == 20)
                 {
                     isLearningMode = true;
                     attempts = 0;
+                    showScoreTimer = 0;
                     resetGame();
                 }
             }
@@ -269,7 +278,6 @@ int main()
 
         else
         {
-
             Vector2 mousePosition = GetMousePosition();
 
             mouseBounds.x = mousePosition.x;
@@ -333,8 +341,20 @@ int main()
 
         if (isLearningMode)
         {
-            DrawText("Learning Mode", 110, 10, 24, WHITE);
+            DrawText("Learning mode", 110, 10, 24, LIGHTGRAY);
+
+            if (showScoreTimer < 5 && highScore > 0)
+            {
+                DrawText(TextFormat("High score: %i", highScore), 110, 340, 24, LIGHTGRAY);
+                showScoreTimer += deltaTime;
+            }
+
+            if (showScoreTimer < 5 && score > 0)
+            {
+                DrawText(TextFormat("Actual score: %i", score), 100, 380, 24, DARKGRAY);
+            }
         }
+
         else
         {
             if (gameTimer > 0)
