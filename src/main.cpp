@@ -106,7 +106,7 @@ int loadHighScore()
     return highScore;
 }
 
-void resetGame()
+void updateHighScore()
 {
     score *= gameTimer;
 
@@ -236,7 +236,7 @@ int main()
                 isLearningMode = true;
                 attempts = 0;
                 showScoreTimer = 0;
-                resetGame();
+                updateHighScore();
             }
 
             std::string actualKanaName = answer;
@@ -251,18 +251,11 @@ int main()
                 if (actualKana.name.compare(actualKanaName) == 0)
                 {
                     isAnswerCorrect = true;
-                    // clearing the array.
-                    answer[0] = '\0';
-                    letterCount = 0;
-                    actualKanaIndex = GetRandomValue(0, totalKanas);
                     score++;
                 }
                 else
                 {
                     isAnswerCorrect = false;
-                    answer[0] = '\0';
-                    letterCount = 0;
-                    actualKanaIndex = GetRandomValue(0, totalKanas);
                 }
 
                 if (!isMute)
@@ -272,14 +265,19 @@ int main()
                 
                 showMessage = true;
 
-                attempts++;
+                // clearing the textbox array.
+                answer[0] = '\0';
+                letterCount = 0;
+                actualKanaIndex = GetRandomValue(0, totalKanas);
 
+                attempts++;
+                
                 if (attempts == 20)
                 {
                     isLearningMode = true;
                     attempts = 0;
                     showScoreTimer = 0;
-                    resetGame();
+                    updateHighScore();
                 }
             }
         }
@@ -445,6 +443,9 @@ int main()
 
         EndDrawing();
     }
+
+    UnloadTexture(muteIconTexture);
+    UnloadTexture(soundIconTexture);
 
     for (auto kana : kanas)
     {
