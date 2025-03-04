@@ -57,7 +57,7 @@ std::vector<Kana> loadAssets()
 
         std::string actualImagePath = baseImagePath + kanaName + imageExtension;
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
-        Rectangle kanaBounds = {40, 50, (float)actualTexture.width, (float)actualTexture.height};
+        Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
         kanas.push_back({kanaName, kanaBounds, actualTexture, actualSound});
     }
@@ -174,7 +174,7 @@ int main()
     char answer[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
     int letterCount = 0;
 
-    Rectangle textBoxBounds = {90, 400, 225, 50};
+    Rectangle textBoxBounds = {90, 425, 225, 50};
 
     int framesCounter = 0;
 
@@ -186,7 +186,34 @@ int main()
     {
         float deltaTime = GetFrameTime();
 
-        Kana actualKana = kanas[actualKanaIndex];
+        // Get char pressed (unicode character) on the queue
+        int character = GetCharPressed();
+
+        // Check if more characters have been pressed on the same frame
+        while (character > 0)
+        {
+            // NOTE: Only allow keys in range [32..125]
+            if ((character >= 32) && (character <= 125) && (letterCount < MAX_INPUT_CHARS))
+            {
+                answer[letterCount] = (char)character;
+                answer[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
+                letterCount++;
+            }
+
+            character = GetCharPressed(); // Check next character in the queue
+        }
+
+        if (IsKeyPressed(KEY_BACKSPACE))
+        {
+            letterCount--;
+
+            if (letterCount < 0)
+            {
+                letterCount = 0;
+            }
+
+            answer[letterCount] = '\0';
+        }
 
         if (IsKeyPressed(KEY_ENTER))
         {
@@ -200,37 +227,12 @@ int main()
             actualKanaIndex = GetRandomValue(0, totalKanas);
         }
 
+        Kana actualKana = kanas[actualKanaIndex];
+
+        std::string actualKanaName = answer;
+
         if (!isLearningMode)
         {
-            // Get char pressed (unicode character) on the queue
-            int character = GetCharPressed();
-
-            // Check if more characters have been pressed on the same frame
-            while (character > 0)
-            {
-                // NOTE: Only allow keys in range [32..125]
-                if ((character >= 32) && (character <= 125) && (letterCount < MAX_INPUT_CHARS))
-                {
-                    answer[letterCount] = (char)character;
-                    answer[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
-                    letterCount++;
-                }
-
-                character = GetCharPressed(); // Check next character in the queue
-            }
-
-            if (IsKeyPressed(KEY_BACKSPACE))
-            {
-                letterCount--;
-
-                if (letterCount < 0)
-                {
-                    letterCount = 0;
-                }
-
-                answer[letterCount] = '\0';
-            }
-
             if (gameTimer < 1)
             {
                 isLearningMode = true;
@@ -238,8 +240,6 @@ int main()
                 showScoreTimer = 0;
                 updateHighScore();
             }
-
-            std::string actualKanaName = answer;
 
             if (IsKeyPressed(KEY_SPACE))
             {
@@ -262,7 +262,7 @@ int main()
                 {
                     PlaySound(actualKana.sound);
                 }
-                
+
                 showMessage = true;
 
                 // clearing the textbox array.
@@ -271,7 +271,7 @@ int main()
                 actualKanaIndex = GetRandomValue(0, totalKanas);
 
                 attempts++;
-                
+
                 if (attempts == 20)
                 {
                     isLearningMode = true;
@@ -284,6 +284,36 @@ int main()
 
         else
         {
+            if (IsKeyPressed(KEY_SPACE))
+            {
+                actualKanaName.pop_back();
+                toLowerCase(actualKanaName);
+
+                for (size_t i = 0; i < kanas.size(); i++)
+                {
+                    if (kanas[i].name.compare(actualKanaName) == 0)
+                    {
+                        actualKana = kanas[i];
+                        actualKanaIndex = i;
+
+                        answer[0] = '\0';
+                        letterCount = 0;
+                        break;
+                    }
+                }
+            }
+
+            if (!isMute)
+            {
+                soundTimer += deltaTime;
+
+                if (soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
+                {
+                    PlaySound(actualKana.sound);
+                    soundTimer = 0;
+                }
+            }
+
             Vector2 mousePosition = GetMousePosition();
 
             mouseBounds.x = mousePosition.x;
@@ -341,17 +371,6 @@ int main()
                     PlaySound(nextKana.sound);
                 }
             }
-
-            if (!isMute)
-            {
-                soundTimer += deltaTime;
-
-                if (soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
-                {
-                    PlaySound(actualKana.sound);
-                    soundTimer = 0;
-                }
-            }
         }
 
         BeginDrawing();
@@ -378,14 +397,16 @@ int main()
 
             if (showScoreTimer < 5 && highScore > 0)
             {
-                DrawText(TextFormat("High score: %i", highScore), 110, 340, 24, LIGHTGRAY);
+                DrawText(TextFormat("High score: %i", highScore), 110, 320, 24, LIGHTGRAY);
                 showScoreTimer += deltaTime;
             }
 
             if (showScoreTimer < 5 && score > 0)
             {
-                DrawText(TextFormat("Actual score: %i", score), 100, 380, 24, DARKGRAY);
+                DrawText(TextFormat("Actual score: %i", score), 100, 360, 24, DARKGRAY);
             }
+
+            DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
         }
 
         else
@@ -398,26 +419,20 @@ int main()
             DrawText(TextFormat("%i", (int)gameTimer), SCREEN_WIDTH - 40, 10, 24, WHITE);
             DrawText(TextFormat("%i", score), 200, 10, 24, WHITE);
             DrawText(TextFormat("%i", highScore), 20, 10, 24, WHITE);
-            DrawRectangle(160, SCREEN_HEIGHT / 2, 70, 40, WHITE);
+            DrawRectangle(160, SCREEN_HEIGHT / 2 - 10, 70, 40, WHITE);
 
             // drawing text box
-            DrawText("WRITE THE ANSWER", 90, 375, 20, LIGHTGRAY);
-
-            DrawRectangleRec(textBoxBounds, LIGHTGRAY);
-
-            DrawRectangleLines((int)textBoxBounds.x, (int)textBoxBounds.y, (int)textBoxBounds.width, (int)textBoxBounds.height, DARKGRAY);
-
-            DrawText(answer, (int)textBoxBounds.x + 5, (int)textBoxBounds.y + 8, 40, DARKGRAY);
+            DrawText("WRITE THE ANSWER", 90, 400, 20, LIGHTGRAY);
 
             if (showMessage)
             {
                 if (isAnswerCorrect)
                 {
-                    DrawText("CORRECT!", 145, 470, 20, LIME);
+                    DrawText("CORRECT!", 145, 500, 20, LIME);
                 }
                 else
                 {
-                    DrawText("WRONG!", 160, 470, 20, RED);
+                    DrawText("WRONG!", 160, 500, 20, RED);
                 }
 
                 showMessageTimer += deltaTime;
@@ -428,16 +443,20 @@ int main()
                     showMessage = false;
                 }
             }
+        }
 
-            framesCounter++;
+        DrawRectangleRec(textBoxBounds, LIGHTGRAY);
+        DrawRectangleLines((int)textBoxBounds.x, (int)textBoxBounds.y, (int)textBoxBounds.width, (int)textBoxBounds.height, DARKGRAY);
+        DrawText(answer, (int)textBoxBounds.x + 5, (int)textBoxBounds.y + 8, 40, DARKGRAY);
 
-            if (letterCount < MAX_INPUT_CHARS)
+        framesCounter++;
+
+        if (letterCount < MAX_INPUT_CHARS)
+        {
+            // Draw blinking underscore char
+            if (((framesCounter / 20) % 2) == 0)
             {
-                // Draw blinking underscore char
-                if (((framesCounter / 20) % 2) == 0)
-                {
-                    DrawText("_", (int)textBoxBounds.x + 8 + MeasureText(answer, 40), (int)textBoxBounds.y + 12, 40, DARKGRAY);
-                }
+                DrawText("_", (int)textBoxBounds.x + 8 + MeasureText(answer, 40), (int)textBoxBounds.y + 12, 40, DARKGRAY);
             }
         }
 
