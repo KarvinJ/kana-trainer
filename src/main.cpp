@@ -22,6 +22,14 @@ typedef struct
     Sound sound;
 } Kana;
 
+typedef struct
+{
+    std::string name;
+    Texture2D texture;
+    Image image;
+    int animationFrames;
+} AnimationKana;
+
 std::vector<Kana> loadAssets()
 {
     std::vector<Kana> kanas;
@@ -32,7 +40,7 @@ std::vector<Kana> loadAssets()
     std::string audioExtension = ".mp3";
     std::string imageExtension = ".png";
 
-    std::vector<std::string> kanaNames = {
+    std::string kanaNames[] = {
         "a", "e", "i", "o", "u",
         "ka", "ga", "ki", "gi", "ku",
         "gu", "ke", "ge", "ko", "go",
@@ -47,8 +55,7 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"
-    };
+        "wa", "wo", "n"};
 
     for (std::string &kanaName : kanaNames)
     {
@@ -146,6 +153,7 @@ int main()
     Texture2D muteIconTexture = LoadTexture("assets/icons/mute-icon.png");
 
     bool isMute = false;
+    bool showKanaAnimation = false;
 
     highScore = loadHighScore();
 
@@ -183,8 +191,69 @@ int main()
     bool showMessage = false;
     bool isAnswerCorrect = false;
 
+    std::vector<AnimationKana> animationKanas;
+
+    std::vector<std::string> drawKanasName = {"a", "e", "i", "o", "u"};
+
+    std::string baseGifPath = "assets/gifs/";
+    std::string gifExtension = ".gif";
+
+    for (auto &kanaName : drawKanasName)
+    {
+        std::string actualGifPath = baseGifPath + kanaName + gifExtension;
+
+        int animationFrames = 0;
+
+        // Load all GIF animation frames into a single Image
+        // NOTE: GIF data is always loaded as RGBA (32bit) by default
+        // NOTE: Frames are just appended one after another in image.data memory
+        Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
+
+        // Load texture from image
+        // NOTE: We will update this texture when required with next frame data
+        // WARNING: It's not recommended to use this technique for sprites animation,
+        // use spritesheets instead, like illustrated in textures_sprite_anim example
+        Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
+
+        animationKanas.push_back({kanaName, drawKanaTexture, kanaAnimation, animationFrames});
+    }
+
+    AnimationKana actualKanaAnimation = animationKanas[0];
+
+    for (auto &animationKana : animationKanas)
+    {
+        if (animationKana.name.compare(kanas[actualKanaIndex].name) == 0)
+        {
+            actualKanaAnimation = animationKana;
+        }
+    }
+
+    int nextFrameDataOffset = 0; // Current byte offset to next frame in image.data
+    int currentAnimFrame = 0; // Current animation frame to load and draw
+    int frameDelay = 8;       // Frame delay to switch between animation frames
+    int frameCounter = 0;     // General frames counter
+
     while (!WindowShouldClose())
     {
+        frameCounter++;
+        if (frameCounter >= frameDelay)
+        {
+            // Move to next frame
+            // NOTE: If final frame is reached we return to first frame
+            currentAnimFrame++;
+            if (currentAnimFrame >= actualKanaAnimation.animationFrames)
+                currentAnimFrame = 0;
+
+            // Get memory offset position for next frame data in image.data
+            nextFrameDataOffset = actualKanaAnimation.image.width * actualKanaAnimation.image.height * 4 * currentAnimFrame;
+
+            // Update GPU texture data with next frame image data
+            // WARNING: Data size (frame size) and pixel format must match already created texture
+            UpdateTexture(actualKanaAnimation.texture, ((unsigned char *)actualKanaAnimation.image.data) + nextFrameDataOffset);
+
+            frameCounter = 0;
+        }
+
         float deltaTime = GetFrameTime();
 
         // Get char pressed (unicode character) on the queue
@@ -229,6 +298,14 @@ int main()
         }
 
         Kana actualKana = kanas[actualKanaIndex];
+
+        for (auto &animationKana : animationKanas)
+    {
+        if (animationKana.name.compare(kanas[actualKanaIndex].name) == 0)
+        {
+            actualKanaAnimation = animationKana;
+        }
+    }
 
         std::string actualKanaName = answer;
 
@@ -327,17 +404,11 @@ int main()
 
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, actualKana.bounds))
             {
-                actualKanaIndex++;
-
-                if (actualKanaIndex > totalKanas)
-                {
-                    actualKanaIndex = 0;
-                }
+                showKanaAnimation = !showKanaAnimation;
 
                 if (!isMute)
                 {
-                    Kana nextKana = kanas[actualKanaIndex];
-                    PlaySound(nextKana.sound);
+                    PlaySound(actualKana.sound);
                 }
             }
 
@@ -405,6 +476,12 @@ int main()
             if (showScoreTimer < 5 && score > 0)
             {
                 DrawText(TextFormat("Actual score: %i", score), 100, 360, 24, DARKGRAY);
+            }
+
+            if (showKanaAnimation)
+            {
+                DrawRectangle(160, SCREEN_HEIGHT / 2 - 10, 70, 40, WHITE);
+                DrawTexture(actualKanaAnimation.texture, GetScreenWidth() / 2 - actualKanaAnimation.texture.width / 2, 40, WHITE);
             }
 
             DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
