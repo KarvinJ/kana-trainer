@@ -192,8 +192,19 @@ int main()
     bool isAnswerCorrect = false;
 
     std::vector<AnimationKana> animationKanas;
+    animationKanas.reserve(47);
 
-    std::vector<std::string> drawKanasName = {"a", "e", "i", "o", "u"};
+    std::vector<std::string> drawKanasName = {
+        "a", "e", "i", "o", "u",
+        "ka", "ki", "ku", "ke", "ko",
+        "sa", "shi", "su", "se", "so", 
+        "ta", "chi", "tsu", "te", "to",
+        "na", "ni", "nu", "ne", "no",
+        "ha", "hi", "fu", "he", "ho",
+        "ma", "mi", "mu", "me", "mo",
+        "ya", "yu", "yo", "ra", "ri",
+        "ru", "re", "ro", "wa", "wo", "n"
+    };
 
     std::string baseGifPath = "assets/gifs/";
     std::string gifExtension = ".gif";
@@ -220,18 +231,10 @@ int main()
 
     AnimationKana actualKanaAnimation = animationKanas[0];
 
-    for (auto &animationKana : animationKanas)
-    {
-        if (animationKana.name.compare(kanas[actualKanaIndex].name) == 0)
-        {
-            actualKanaAnimation = animationKana;
-        }
-    }
-
-    int nextFrameDataOffset = 0; // Current byte offset to next frame in image.data
-    int currentAnimFrame = 0; // Current animation frame to load and draw
-    int frameDelay = 8;       // Frame delay to switch between animation frames
-    int frameCounter = 0;     // General frames counter
+    int nextFrameDataOffset = 0;   // Current byte offset to next frame in image.data
+    int currentAnimationFrame = 0; // Current animation frame to load and draw
+    int frameDelay = 8;            // Frame delay to switch between animation frames
+    int frameCounter = 0;          // General frames counter
 
     while (!WindowShouldClose())
     {
@@ -240,12 +243,12 @@ int main()
         {
             // Move to next frame
             // NOTE: If final frame is reached we return to first frame
-            currentAnimFrame++;
-            if (currentAnimFrame >= actualKanaAnimation.animationFrames)
-                currentAnimFrame = 0;
+            currentAnimationFrame++;
+            if (currentAnimationFrame >= actualKanaAnimation.animationFrames)
+                currentAnimationFrame = 0;
 
             // Get memory offset position for next frame data in image.data
-            nextFrameDataOffset = actualKanaAnimation.image.width * actualKanaAnimation.image.height * 4 * currentAnimFrame;
+            nextFrameDataOffset = actualKanaAnimation.image.width * actualKanaAnimation.image.height * 4 * currentAnimationFrame;
 
             // Update GPU texture data with next frame image data
             // WARNING: Data size (frame size) and pixel format must match already created texture
@@ -300,12 +303,13 @@ int main()
         Kana actualKana = kanas[actualKanaIndex];
 
         for (auto &animationKana : animationKanas)
-    {
-        if (animationKana.name.compare(kanas[actualKanaIndex].name) == 0)
         {
-            actualKanaAnimation = animationKana;
+            if (animationKana.name.compare(actualKana.name) == 0)
+            {
+                actualKanaAnimation = animationKana;
+                break;
+            }
         }
-    }
 
         std::string actualKanaName = answer;
 
@@ -376,6 +380,8 @@ int main()
 
                         answer[0] = '\0';
                         letterCount = 0;
+
+                        currentAnimationFrame = 0;
                         break;
                     }
                 }
@@ -405,11 +411,7 @@ int main()
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, actualKana.bounds))
             {
                 showKanaAnimation = !showKanaAnimation;
-
-                if (!isMute)
-                {
-                    PlaySound(actualKana.sound);
-                }
+                currentAnimationFrame = 0;
             }
 
             if (IsKeyPressed(KEY_RIGHT))
