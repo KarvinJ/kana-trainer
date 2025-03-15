@@ -288,6 +288,7 @@ int main()
         if (IsKeyPressed(KEY_ENTER))
         {
             isLearningMode = !isLearningMode;
+            showKanaAnimation = false;
             score = 0;
             attempts = 0;
             gameTimer = MAX_GAME_TIME;
@@ -445,8 +446,11 @@ int main()
 
         ClearBackground(Color{29, 29, 27, 255});
 
-        DrawRectangleRounded(actualKana.bounds, 0.3, 6, WHITE);
-        DrawTexture(actualKana.texture, actualKana.bounds.x, actualKana.bounds.y, WHITE);
+        if (!showKanaAnimation)
+        {
+            DrawRectangleRounded(actualKana.bounds, 0.3, 6, WHITE);
+            DrawTexture(actualKana.texture, actualKana.bounds.x, actualKana.bounds.y, WHITE);
+        }
 
         if (isLearningMode)
         {
@@ -476,7 +480,6 @@ int main()
 
             if (showKanaAnimation)
             {
-                DrawRectangle(160, SCREEN_HEIGHT / 2 - 10, 70, 40, WHITE);
                 DrawTexture(actualKanaAnimation.texture, GetScreenWidth() / 2 - actualKanaAnimation.texture.width / 2, 40, WHITE);
             }
 
