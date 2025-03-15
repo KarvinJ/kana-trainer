@@ -540,10 +540,16 @@ int main()
     UnloadTexture(muteIconTexture);
     UnloadTexture(soundIconTexture);
 
-    for (auto kana : kanas)
+    for (auto &kana : kanas)
     {
         UnloadTexture(kana.texture);
         UnloadSound(kana.sound);
+    }
+
+    for (auto &animationKana : animationKanas)
+    {
+        UnloadTexture(animationKana.texture);
+        UnloadImage(animationKana.image);
     }
 
     CloseAudioDevice();
