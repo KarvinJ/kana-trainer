@@ -55,7 +55,8 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"};
+        "wa", "wo", "n"
+    };
 
     for (std::string &kanaName : kanaNames)
     {
@@ -173,11 +174,6 @@ int main()
 
     bool isLearningMode = true;
 
-    if (isLearningMode)
-    {
-        PlaySound(kanas[actualKanaIndex].sound);
-    }
-
     Rectangle mouseBounds = {0, 0, 8, 8};
 
     char answer[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
@@ -191,13 +187,14 @@ int main()
     bool showMessage = false;
     bool isAnswerCorrect = false;
 
+    // load kanas animations
     std::vector<AnimationKana> animationKanas;
-    animationKanas.reserve(47);
+    animationKanas.reserve(46);
 
     std::vector<std::string> drawKanasName = {
         "a", "e", "i", "o", "u",
         "ka", "ki", "ku", "ke", "ko",
-        "sa", "shi", "su", "se", "so", 
+        "sa", "shi", "su", "se", "so",
         "ta", "chi", "tsu", "te", "to",
         "na", "ni", "nu", "ne", "no",
         "ha", "hi", "fu", "he", "ho",
@@ -302,15 +299,6 @@ int main()
 
         Kana actualKana = kanas[actualKanaIndex];
 
-        for (auto &animationKana : animationKanas)
-        {
-            if (animationKana.name.compare(actualKana.name) == 0)
-            {
-                actualKanaAnimation = animationKana;
-                break;
-            }
-        }
-
         std::string actualKanaName = answer;
 
         if (!isLearningMode)
@@ -366,6 +354,15 @@ int main()
 
         else
         {
+            for (auto &animationKana : animationKanas)
+            {
+                if (animationKana.name.compare(actualKana.name) == 0)
+                {
+                    actualKanaAnimation = animationKana;
+                    break;
+                }
+            }
+
             if (IsKeyPressed(KEY_SPACE))
             {
                 actualKanaName.pop_back();
