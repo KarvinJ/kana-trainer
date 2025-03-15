@@ -377,8 +377,6 @@ int main()
 
                         answer[0] = '\0';
                         letterCount = 0;
-
-                        currentAnimationFrame = 0;
                         break;
                     }
                 }
@@ -408,7 +406,6 @@ int main()
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, actualKana.bounds))
             {
                 showKanaAnimation = !showKanaAnimation;
-                currentAnimationFrame = 0;
             }
 
             if (IsKeyPressed(KEY_RIGHT))
