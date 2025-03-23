@@ -72,15 +72,17 @@ std::vector<Kana> loadAssets()
 
     std::string baseKatakanaPath = "assets/img/katakanas/";
 
-    for (size_t i = 0; i < 71; i++)
-    {
-        auto actualKana = kanas[i];
+    int actualMaxSize = kanas.size();
 
-        std::string actualImagePath = baseKatakanaPath + actualKana.name + imageExtension;
+    for (int i = 0; i < actualMaxSize; i++)
+    {
+        auto actualAnimation = kanas[i];
+
+        std::string actualImagePath = baseKatakanaPath + actualAnimation.name + imageExtension;
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
-        kanas.push_back({actualKana.name, kanaBounds, actualTexture, actualKana.sound});
+        kanas.push_back({actualAnimation.name, kanaBounds, actualTexture, actualAnimation.sound});
     }
 
     return kanas;
@@ -216,7 +218,7 @@ int main()
 
     // load kanas animations
     std::vector<AnimationKana> animationKanas;
-    animationKanas.reserve(46);
+    animationKanas.reserve(92);
 
     std::vector<std::string> drawKanasName = {
         "a", "e", "i", "o", "u",
@@ -229,12 +231,12 @@ int main()
         "ya", "yu", "yo", "ra", "ri",
         "ru", "re", "ro", "wa", "wo", "n"};
 
-    std::string baseGifPath = "assets/gifs/hiraganas/";
+    std::string baseHiraganaGifPath = "assets/gifs/hiraganas/";
     std::string gifExtension = ".gif";
 
     for (auto &kanaName : drawKanasName)
     {
-        std::string actualGifPath = baseGifPath + kanaName + gifExtension;
+        std::string actualGifPath = baseHiraganaGifPath + kanaName + gifExtension;
 
         int animationFrames = 0;
 
@@ -251,6 +253,25 @@ int main()
 
         animationKanas.push_back({kanaName, drawKanaTexture, kanaAnimation, animationFrames});
     }
+
+    // std::string baseKatakanaGifPath = "assets/gifs/katakanas/";
+
+    // int actualMaxSize = kanas.size();
+
+    // for (int i = 0; i < actualMaxSize; i++)
+    // {
+    //     auto actualKana = animationKanas[i];
+
+    //     std::string actualGifPath = baseKatakanaGifPath + actualKana.name + gifExtension;
+
+    //     int animationFrames = 0;
+
+    //     Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
+
+    //     Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
+
+    //     animationKanas.push_back({actualKana.name, drawKanaTexture, kanaAnimation, animationFrames});
+    // }
 
     AnimationKana actualKanaAnimation = animationKanas[0];
 
