@@ -33,10 +33,11 @@ typedef struct
 std::vector<Kana> loadAssets()
 {
     std::vector<Kana> kanas;
-    kanas.reserve(71);
+    kanas.reserve(142);
 
     std::string baseAudioPath = "assets/sounds/";
-    std::string baseImagePath = "assets/img/";
+    std::string baseHiraganaPath = "assets/img/hiraganas/";
+    std::string baseKatakanaPath = "assets/img/katakanas/";
     std::string audioExtension = ".mp3";
     std::string imageExtension = ".png";
 
@@ -64,11 +65,24 @@ std::vector<Kana> loadAssets()
         Sound actualSound = LoadSound(actualAudioPath.c_str());
         SetSoundVolume(actualSound, 0.8);
 
-        std::string actualImagePath = baseImagePath + kanaName + imageExtension;
+        std::string actualImagePath = baseHiraganaPath + kanaName + imageExtension;
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
         kanas.push_back({kanaName, kanaBounds, actualTexture, actualSound});
+    }
+
+    for (std::string &kanaName : kanaNames)
+    {
+        // std::string actualAudioPath = baseAudioPath + kanaName + audioExtension;
+        // Sound actualSound = LoadSound(actualAudioPath.c_str());
+        // SetSoundVolume(actualSound, 0.8);
+
+        std::string actualImagePath = baseKatakanaPath + kanaName + imageExtension;
+        Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
+        Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
+
+        kanas.push_back({kanaName, kanaBounds, actualTexture, nullptr});
     }
 
     return kanas;
@@ -168,6 +182,9 @@ int main()
 
     std::vector<Kana> kanas = loadAssets();
 
+    // bool isLearningHirana = true;
+
+    //there are 71 hiragana + 71 katakanas = 142. 
     int totalKanas = kanas.size() - 1;
 
     int actualKanaIndex = GetRandomValue(0, totalKanas);
@@ -203,7 +220,7 @@ int main()
         "ru", "re", "ro", "wa", "wo", "n"
     };
 
-    std::string baseGifPath = "assets/gifs/";
+    std::string baseGifPath = "assets/gifs/hiraganas/";
     std::string gifExtension = ".gif";
 
     for (auto &kanaName : drawKanasName)
@@ -448,7 +465,7 @@ int main()
 
         if (!showKanaAnimation)
         {
-            DrawRectangleRounded(actualKana.bounds, 0.3, 6, WHITE);
+            DrawRectangleRec(actualKana.bounds, WHITE);
             DrawTexture(actualKana.texture, actualKana.bounds.x, actualKana.bounds.y, WHITE);
         }
 
