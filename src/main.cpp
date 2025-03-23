@@ -254,24 +254,24 @@ int main()
         animationKanas.push_back({kanaName, drawKanaTexture, kanaAnimation, animationFrames});
     }
 
-    // std::string baseKatakanaGifPath = "assets/gifs/katakanas/";
+    std::string baseKatakanaGifPath = "assets/gifs/katakanas/";
 
-    // int actualMaxSize = kanas.size();
+    int actualMaxSize = drawKanasName.size();
 
-    // for (int i = 0; i < actualMaxSize; i++)
-    // {
-    //     auto actualKana = animationKanas[i];
+    for (int i = 0; i < actualMaxSize; i++)
+    {
+        auto kanaName = drawKanasName[i];
 
-    //     std::string actualGifPath = baseKatakanaGifPath + actualKana.name + gifExtension;
+        std::string actualGifPath = baseKatakanaGifPath + kanaName + gifExtension;
 
-    //     int animationFrames = 0;
+        int animationFrames = 0;
 
-    //     Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
+        Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
 
-    //     Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
+        Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
 
-    //     animationKanas.push_back({actualKana.name, drawKanaTexture, kanaAnimation, animationFrames});
-    // }
+        animationKanas.push_back({kanaName, drawKanaTexture, kanaAnimation, animationFrames});
+    }
 
     AnimationKana actualKanaAnimation = animationKanas[0];
 
