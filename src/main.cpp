@@ -237,6 +237,7 @@ int main()
 
         int animationFrames = 0;
 
+        //Since I'm loading images, the ram consumption will go up. 
         // Load all GIF animation frames into a single Image
         // NOTE: GIF data is always loaded as RGBA (32bit) by default
         // NOTE: Frames are just appended one after another in image.data memory
