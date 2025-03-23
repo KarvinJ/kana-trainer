@@ -165,6 +165,9 @@ int main()
 
     Texture2D muteIconTexture = LoadTexture("assets/icons/mute-icon.png");
 
+    Texture2D checkIconTexture = LoadTexture("assets/icons/check-icon.png");
+    Rectangle checkIconBounds = {8, 10, (float)checkIconTexture.width, (float)checkIconTexture.height};
+
     bool isMute = false;
     bool showKanaAnimation = false;
 
@@ -197,7 +200,7 @@ int main()
     {
         actualKanaIndex = GetRandomValue(katakanasInitialIndex, totalKanas);
     }
-    
+
     Rectangle mouseBounds = {0, 0, 8, 8};
 
     char answer[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
@@ -422,8 +425,8 @@ int main()
                 {
                     actualInitialIndex = katakanasInitialIndex;
                 }
-                
-                for (size_t i = actualInitialIndex; i < totalKanas + 1; i++)
+
+                for (int i = actualInitialIndex; i < totalKanas + 1; i++)
                 {
                     if (kanas[i].name.compare(actualKanaName) == 0)
                     {
@@ -456,6 +459,26 @@ int main()
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, soundIconBounds))
             {
                 isMute = !isMute;
+            }
+
+            else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, checkIconBounds))
+            {
+                isHiraganaMode = !isHiraganaMode;
+
+                if (isHiraganaMode)
+                {
+                    actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
+                }
+                else
+                {
+                    actualKanaIndex = GetRandomValue(katakanasInitialIndex, kanas.size() - 1);
+                }
+
+                if (!isMute)
+                {
+                    Kana nextKana = kanas[actualKanaIndex];
+                    PlaySound(nextKana.sound);
+                }
             }
 
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, actualKana.bounds))
@@ -516,17 +539,31 @@ int main()
 
         if (isLearningMode)
         {
-            DrawText("Learning mode", 110, 10, 24, LIGHTGRAY);
+            if (isHiraganaMode)
+            {
+                DrawText("Hiragana mode", 110, 10, 24, LIGHTGRAY);
+            }
+            else
+            {
+                DrawText("katakana mode", 110, 10, 24, LIGHTGRAY);
+            }
 
             if (!isMute)
             {
-                DrawRectangleRounded(soundIconBounds, 0.3, 6, DARKGRAY);
+                DrawRectangleRounded(soundIconBounds, 0.3, 6, LIGHTGRAY);
                 DrawTexture(soundIconTexture, soundIconBounds.x, soundIconBounds.y, WHITE);
             }
             else
             {
-                DrawRectangleRounded(soundIconBounds, 0.3, 6, DARKGRAY);
+                DrawRectangleRounded(soundIconBounds, 0.3, 6, LIGHTGRAY);
                 DrawTexture(muteIconTexture, soundIconBounds.x, soundIconBounds.y, WHITE);
+            }
+
+            DrawRectangleRounded(checkIconBounds, 0.3, 6, LIGHTGRAY);
+
+            if (isHiraganaMode)
+            {
+                DrawTexture(checkIconTexture, checkIconBounds.x, checkIconBounds.y, WHITE);
             }
 
             if (showScoreTimer < 5 && highScore > 0)
