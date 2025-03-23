@@ -35,8 +35,8 @@ std::vector<Kana> loadAssets()
     std::vector<Kana> kanas;
     kanas.reserve(142);
 
-    std::string baseAudioPath = "assets/sounds/";
-    std::string baseHiraganaPath = "assets/img/hiraganas/";
+    std::string audioPath = "assets/sounds/";
+    std::string hiraganaImgsPath = "assets/img/hiraganas/";
     std::string audioExtension = ".mp3";
     std::string imageExtension = ".png";
 
@@ -55,22 +55,23 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"};
+        "wa", "wo", "n"
+    };
 
     for (std::string &kanaName : kanaNames)
     {
-        std::string actualAudioPath = baseAudioPath + kanaName + audioExtension;
+        std::string actualAudioPath = audioPath + kanaName + audioExtension;
         Sound actualSound = LoadSound(actualAudioPath.c_str());
         SetSoundVolume(actualSound, 0.8);
 
-        std::string actualImagePath = baseHiraganaPath + kanaName + imageExtension;
+        std::string actualImagePath = hiraganaImgsPath + kanaName + imageExtension;
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
         kanas.push_back({kanaName, kanaBounds, actualTexture, actualSound});
     }
 
-    std::string baseKatakanaPath = "assets/img/katakanas/";
+    std::string katakanaImgsPath = "assets/img/katakanas/";
 
     int actualMaxSize = kanas.size();
 
@@ -78,7 +79,7 @@ std::vector<Kana> loadAssets()
     {
         auto actualAnimation = kanas[i];
 
-        std::string actualImagePath = baseKatakanaPath + actualAnimation.name + imageExtension;
+        std::string actualImagePath = katakanaImgsPath + actualAnimation.name + imageExtension;
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
@@ -198,11 +199,6 @@ int main()
 
     int actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
 
-    if (!isHiraganaMode)
-    {
-        actualKanaIndex = GetRandomValue(katakanasInitialIndex, totalKanas);
-    }
-
     Rectangle mouseBounds = {0, 0, 8, 8};
 
     char answer[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
@@ -229,14 +225,15 @@ int main()
         "ha", "hi", "fu", "he", "ho",
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo", "ra", "ri",
-        "ru", "re", "ro", "wa", "wo", "n"};
+        "ru", "re", "ro", "wa", "wo", "n"
+    };
 
-    std::string baseHiraganaGifPath = "assets/gifs/hiraganas/";
+    std::string hiraganaGifPath = "assets/gifs/hiraganas/";
     std::string gifExtension = ".gif";
 
     for (auto &kanaName : drawKanasName)
     {
-        std::string actualGifPath = baseHiraganaGifPath + kanaName + gifExtension;
+        std::string actualGifPath = hiraganaGifPath + kanaName + gifExtension;
 
         int animationFrames = 0;
 
@@ -254,7 +251,7 @@ int main()
         animationKanas.push_back({kanaName, drawKanaTexture, kanaAnimation, animationFrames});
     }
 
-    std::string baseKatakanaGifPath = "assets/gifs/katakanas/";
+    std::string katakanaGifPath = "assets/gifs/katakanas/";
 
     int actualMaxSize = drawKanasName.size();
 
@@ -262,7 +259,7 @@ int main()
     {
         auto kanaName = drawKanasName[i];
 
-        std::string actualGifPath = baseKatakanaGifPath + kanaName + gifExtension;
+        std::string actualGifPath = katakanaGifPath + kanaName + gifExtension;
 
         int animationFrames = 0;
 
@@ -272,6 +269,11 @@ int main()
 
         animationKanas.push_back({kanaName, drawKanaTexture, kanaAnimation, animationFrames});
     }
+
+    int hiraganaAnimationsInitialIndex = 0;
+    int totalHiraganaAnimations = animationKanas.size() / 2 - 1;
+
+    int katakanaAnimationsInitialIndex = totalHiraganaAnimations + 1;
 
     AnimationKana actualKanaAnimation = animationKanas[0];
 
@@ -292,6 +294,7 @@ int main()
         }
 
         frameCounter++;
+
         if (frameCounter >= frameDelay)
         {
             // Move to next frame
@@ -426,8 +429,17 @@ int main()
 
         else
         {
-            for (auto &animationKana : animationKanas)
+            int actualAnimationInitialIndex = hiraganaAnimationsInitialIndex;
+
+            if (!isHiraganaMode)
             {
+                actualAnimationInitialIndex = katakanaAnimationsInitialIndex;
+            }
+
+            for (int i = actualAnimationInitialIndex; i < totalKanas + 1; i++)
+            {
+                auto animationKana = animationKanas[i];
+
                 if (animationKana.name.compare(actualKana.name) == 0)
                 {
                     actualKanaAnimation = animationKana;
