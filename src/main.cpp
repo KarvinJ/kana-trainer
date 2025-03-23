@@ -37,7 +37,6 @@ std::vector<Kana> loadAssets()
 
     std::string baseAudioPath = "assets/sounds/";
     std::string baseHiraganaPath = "assets/img/hiraganas/";
-    std::string baseKatakanaPath = "assets/img/katakanas/";
     std::string audioExtension = ".mp3";
     std::string imageExtension = ".png";
 
@@ -56,8 +55,7 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"
-    };
+        "wa", "wo", "n"};
 
     for (std::string &kanaName : kanaNames)
     {
@@ -72,17 +70,17 @@ std::vector<Kana> loadAssets()
         kanas.push_back({kanaName, kanaBounds, actualTexture, actualSound});
     }
 
-    for (std::string &kanaName : kanaNames)
-    {
-        // std::string actualAudioPath = baseAudioPath + kanaName + audioExtension;
-        // Sound actualSound = LoadSound(actualAudioPath.c_str());
-        // SetSoundVolume(actualSound, 0.8);
+    std::string baseKatakanaPath = "assets/img/katakanas/";
 
-        std::string actualImagePath = baseKatakanaPath + kanaName + imageExtension;
+    for (size_t i = 0; i < 71; i++)
+    {
+        auto actualKana = kanas[i];
+
+        std::string actualImagePath = baseKatakanaPath + actualKana.name + imageExtension;
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
-        kanas.push_back({kanaName, kanaBounds, actualTexture, nullptr});
+        kanas.push_back({actualKana.name, kanaBounds, actualTexture, actualKana.sound});
     }
 
     return kanas;
@@ -182,15 +180,24 @@ int main()
 
     std::vector<Kana> kanas = loadAssets();
 
-    // bool isLearningHirana = true;
-
-    //there are 71 hiragana + 71 katakanas = 142. 
+    // there are 71 hiragana + 71 katakanas = 142.
     int totalKanas = kanas.size() - 1;
 
-    int actualKanaIndex = GetRandomValue(0, totalKanas);
+    int hiraganasInitialIndex = 0;
+    int totalHiraganas = kanas.size() / 2 - 1;
+
+    int katakanasInitialIndex = totalHiraganas + 1;
 
     bool isLearningMode = true;
+    bool isHiraganaMode = true;
 
+    int actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
+
+    if (!isHiraganaMode)
+    {
+        actualKanaIndex = GetRandomValue(katakanasInitialIndex, totalKanas);
+    }
+    
     Rectangle mouseBounds = {0, 0, 8, 8};
 
     char answer[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
@@ -217,8 +224,7 @@ int main()
         "ha", "hi", "fu", "he", "ho",
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo", "ra", "ri",
-        "ru", "re", "ro", "wa", "wo", "n"
-    };
+        "ru", "re", "ro", "wa", "wo", "n"};
 
     std::string baseGifPath = "assets/gifs/hiraganas/";
     std::string gifExtension = ".gif";
@@ -252,6 +258,15 @@ int main()
 
     while (!WindowShouldClose())
     {
+        if (isHiraganaMode)
+        {
+            totalKanas = totalHiraganas;
+        }
+        else
+        {
+            totalKanas = kanas.size() - 1;
+        }
+
         frameCounter++;
         if (frameCounter >= frameDelay)
         {
@@ -312,7 +327,15 @@ int main()
 
             answer[0] = '\0';
             letterCount = 0;
-            actualKanaIndex = GetRandomValue(0, totalKanas);
+
+            if (isHiraganaMode)
+            {
+                actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalKanas);
+            }
+            else
+            {
+                actualKanaIndex = GetRandomValue(katakanasInitialIndex, totalKanas);
+            }
         }
 
         Kana actualKana = kanas[actualKanaIndex];
@@ -356,7 +379,14 @@ int main()
                 // clearing the textbox array.
                 answer[0] = '\0';
                 letterCount = 0;
-                actualKanaIndex = GetRandomValue(0, totalKanas);
+                if (isHiraganaMode)
+                {
+                    actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalKanas);
+                }
+                else
+                {
+                    actualKanaIndex = GetRandomValue(katakanasInitialIndex, totalKanas);
+                }
 
                 attempts++;
 
@@ -386,7 +416,14 @@ int main()
                 actualKanaName.pop_back();
                 toLowerCase(actualKanaName);
 
-                for (size_t i = 0; i < kanas.size(); i++)
+                int actualInitialIndex = hiraganasInitialIndex;
+
+                if (!isHiraganaMode)
+                {
+                    actualInitialIndex = katakanasInitialIndex;
+                }
+                
+                for (size_t i = actualInitialIndex; i < totalKanas + 1; i++)
                 {
                     if (kanas[i].name.compare(actualKanaName) == 0)
                     {
@@ -430,9 +467,13 @@ int main()
             {
                 actualKanaIndex++;
 
-                if (actualKanaIndex > totalKanas)
+                if (isHiraganaMode && actualKanaIndex > totalKanas)
                 {
-                    actualKanaIndex = 0;
+                    actualKanaIndex = hiraganasInitialIndex;
+                }
+                else if (!isHiraganaMode && actualKanaIndex > totalKanas)
+                {
+                    actualKanaIndex = katakanasInitialIndex;
                 }
 
                 if (!isMute)
@@ -446,7 +487,11 @@ int main()
             {
                 actualKanaIndex--;
 
-                if (actualKanaIndex < 0)
+                if (isHiraganaMode && actualKanaIndex < hiraganasInitialIndex)
+                {
+                    actualKanaIndex = totalKanas;
+                }
+                else if (!isHiraganaMode && actualKanaIndex < katakanasInitialIndex)
                 {
                     actualKanaIndex = totalKanas;
                 }
@@ -513,7 +558,7 @@ int main()
             DrawText(TextFormat("%i", (int)gameTimer), SCREEN_WIDTH - 40, 10, 24, WHITE);
             DrawText(TextFormat("%i", score), 200, 10, 24, WHITE);
             DrawText(TextFormat("%i", highScore), 20, 10, 24, WHITE);
-            DrawRectangle(160, SCREEN_HEIGHT / 2 - 10, 70, 40, WHITE);
+            DrawRectangle(160, SCREEN_HEIGHT / 2 - 10, 80, 45, WHITE);
 
             // drawing text box
             DrawText("WRITE THE ANSWER", 90, 400, 20, LIGHTGRAY);
@@ -563,7 +608,7 @@ int main()
     for (auto &kana : kanas)
     {
         UnloadTexture(kana.texture);
-        UnloadSound(kana.sound);
+        // UnloadSound(kana.sound);
     }
 
     for (auto &animationKana : animationKanas)
