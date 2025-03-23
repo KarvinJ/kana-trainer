@@ -270,6 +270,7 @@ int main()
         animationKanas.push_back({kanaName, drawKanaTexture, kanaAnimation, animationFrames});
     }
 
+    int totalAnimations = animationKanas.size() - 1;
     int hiraganaAnimationsInitialIndex = 0;
     int totalHiraganaAnimations = animationKanas.size() / 2 - 1;
 
@@ -287,10 +288,12 @@ int main()
         if (isHiraganaMode)
         {
             totalKanas = totalHiraganas;
+            totalAnimations = totalHiraganaAnimations;
         }
         else
         {
             totalKanas = kanas.size() - 1;
+            totalAnimations = animationKanas.size() - 1;
         }
 
         frameCounter++;
@@ -436,7 +439,7 @@ int main()
                 actualAnimationInitialIndex = katakanaAnimationsInitialIndex;
             }
 
-            for (int i = actualAnimationInitialIndex; i < totalKanas + 1; i++)
+            for (int i = actualAnimationInitialIndex; i < totalAnimations + 1; i++)
             {
                 auto animationKana = animationKanas[i];
 
