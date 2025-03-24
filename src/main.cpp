@@ -160,7 +160,7 @@ void toLowerCase(std::string &string)
 
 int main()
 {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jap-Tester");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "KANA-TRAINER");
     SetTargetFPS(60);
 
     Texture2D soundIconTexture = LoadTexture("assets/icons/sound-icon.png");

@@ -1,6 +1,6 @@
-# JAP-TESTER
+# KANA-TRAINER
 
-A simple app to learn and practice hiragana.
+A simple app to learn and practice japanese kanas.
 
 ## Building instructions
 
