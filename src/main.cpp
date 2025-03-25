@@ -9,6 +9,8 @@ const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 544;
 const int MAX_GAME_TIME = 60;
 
+std::string line2;
+
 float gameTimer = MAX_GAME_TIME;
 
 int score = 0;
@@ -55,8 +57,7 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"
-    };
+        "wa", "wo", "n"};
 
     for (std::string &kanaName : kanaNames)
     {
@@ -100,6 +101,38 @@ void saveScore()
     highScores.close();
 }
 
+void testSave()
+{
+    std::ofstream test("assets/test.txt");
+
+    for (int i = 1; i < 11; i++)
+    {
+        test << i << "\n";
+    }
+
+    test.close();
+}
+
+void testLoad()
+{
+    std::string testText;
+
+    std::ifstream test("assets/test.txt");
+
+    if (!test.is_open())
+    {
+        testSave();
+    }
+
+    for (std::string line; getline(test, line);)
+    {
+        std::cout << line;
+        line2 = line;
+    }
+
+    test.close();
+}
+
 int loadHighScore()
 {
     std::string highScoreText;
@@ -114,7 +147,7 @@ int loadHighScore()
 
         getline(auxHighScores, highScoreText);
 
-        highScores.close();
+        auxHighScores.close();
 
         int highScore = stoi(highScoreText);
 
@@ -176,6 +209,8 @@ int main()
 
     highScore = loadHighScore();
 
+    testLoad();
+
     int attempts = 0;
 
     // need to explicitly define local variable values, if not I'll get a segmentation fault.
@@ -225,8 +260,7 @@ int main()
         "ha", "hi", "fu", "he", "ho",
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo", "ra", "ri",
-        "ru", "re", "ro", "wa", "wo", "n"
-    };
+        "ru", "re", "ro", "wa", "wo", "n"};
 
     std::string hiraganaGifPath = "assets/gifs/hiraganas/";
     std::string gifExtension = ".gif";
@@ -237,10 +271,10 @@ int main()
 
         int animationFrames = 0;
 
-        //Since I'm loading images, the ram consumption will go up. 
-        // Load all GIF animation frames into a single Image
-        // NOTE: GIF data is always loaded as RGBA (32bit) by default
-        // NOTE: Frames are just appended one after another in image.data memory
+        // Since I'm loading images, the ram consumption will go up.
+        //  Load all GIF animation frames into a single Image
+        //  NOTE: GIF data is always loaded as RGBA (32bit) by default
+        //  NOTE: Frames are just appended one after another in image.data memory
         Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
 
         // Load texture from image
@@ -620,6 +654,8 @@ int main()
             }
 
             DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
+
+            // DrawText(line2.c_str(), 90, 350, 20, LIGHTGRAY);
         }
 
         else
