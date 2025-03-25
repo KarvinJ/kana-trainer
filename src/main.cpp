@@ -57,7 +57,8 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"};
+        "wa", "wo", "n"
+    };
 
     for (std::string &kanaName : kanaNames)
     {
@@ -260,7 +261,8 @@ int main()
         "ha", "hi", "fu", "he", "ho",
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo", "ra", "ri",
-        "ru", "re", "ro", "wa", "wo", "n"};
+        "ru", "re", "ro", "wa", "wo", "n"
+    };
 
     std::string hiraganaGifPath = "assets/gifs/hiraganas/";
     std::string gifExtension = ".gif";
