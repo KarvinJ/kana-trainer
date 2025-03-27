@@ -106,9 +106,14 @@ void testSave()
 {
     std::ofstream test("assets/test.txt");
 
+    std::string test2 = "kar";
+
     for (int i = 1; i < 11; i++)
     {
-        test << i << "\n";
+        std::string scoreString = std::to_string(i);
+
+        std::string actualImagePath = test2 + " " + scoreString;
+        test << actualImagePath << "\n";
     }
 
     test.close();
