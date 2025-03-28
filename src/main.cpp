@@ -99,7 +99,6 @@ std::vector<Kana> loadAssets()
         std::string actualGifPath = katakanaGifPath + actualAnimation.name + gifExtension;
 
         int animationFrames = 0;
-
         Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
 
         Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
@@ -269,8 +268,6 @@ int main()
     bool showMessage = false;
     bool isAnswerCorrect = false;
 
-    Kana actualKanaAnimation = kanas[0];
-
     int nextFrameDataOffset = 0;   // Current byte offset to next frame in image.data
     int currentAnimationFrame = 0; // Current animation frame to load and draw
     int frameDelay = 8;            // Frame delay to switch between animation frames
@@ -287,6 +284,8 @@ int main()
             totalKanas = kanas.size() - 1;
         }
 
+        Kana actualKana = kanas[actualKanaIndex];
+
         frameCounter++;
 
         if (frameCounter >= frameDelay)
@@ -294,15 +293,15 @@ int main()
             // Move to next frame
             // NOTE: If final frame is reached we return to first frame
             currentAnimationFrame++;
-            if (currentAnimationFrame >= actualKanaAnimation.animationFrames)
+            if (currentAnimationFrame >= actualKana.animationFrames)
                 currentAnimationFrame = 0;
 
             // Get memory offset position for next frame data in image.data
-            nextFrameDataOffset = actualKanaAnimation.image.width * actualKanaAnimation.image.height * 4 * currentAnimationFrame;
+            nextFrameDataOffset = actualKana.image.width * actualKana.image.height * 4 * currentAnimationFrame;
 
             // Update GPU texture data with next frame image data
             // WARNING: Data size (frame size) and pixel format must match already created texture
-            UpdateTexture(actualKanaAnimation.animationTexture, ((unsigned char *)actualKanaAnimation.image.data) + nextFrameDataOffset);
+            UpdateTexture(actualKana.animationTexture, ((unsigned char *)actualKana.image.data) + nextFrameDataOffset);
 
             frameCounter = 0;
         }
@@ -358,8 +357,6 @@ int main()
                 actualKanaIndex = GetRandomValue(katakanasInitialIndex, totalKanas);
             }
         }
-
-        Kana actualKana = kanas[actualKanaIndex];
 
         std::string actualKanaName = answer;
 
@@ -423,8 +420,6 @@ int main()
 
         else
         {
-            actualKanaAnimation = actualKana;
-
             if (IsKeyPressed(KEY_SPACE))
             {
                 actualKanaName.pop_back();
@@ -590,7 +585,7 @@ int main()
 
             if (showKanaAnimation)
             {
-                DrawTexture(actualKanaAnimation.animationTexture, GetScreenWidth() / 2 - actualKanaAnimation.animationTexture.width / 2, 40, WHITE);
+                DrawTexture(actualKana.animationTexture, GetScreenWidth() / 2 - actualKana.animationTexture.width / 2, 40, WHITE);
             }
 
             DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
