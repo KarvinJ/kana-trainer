@@ -19,15 +19,10 @@ typedef struct
     Rectangle bounds;
     Texture2D texture;
     Sound sound;
-} Kana;
-
-typedef struct
-{
-    std::string name;
-    Texture2D texture;
+    Texture2D animationTexture;
     Image image;
     int animationFrames;
-} AnimationKana;
+} Kana;
 
 std::vector<Kana> loadAssets()
 {
@@ -38,6 +33,8 @@ std::vector<Kana> loadAssets()
     std::string hiraganaImgsPath = "assets/img/hiraganas/";
     std::string audioExtension = ".mp3";
     std::string imageExtension = ".png";
+    std::string hiraganaGifPath = "assets/gifs/hiraganas/";
+    std::string gifExtension = ".gif";
 
     std::string kanaNames[] = {
         "a", "e", "i", "o", "u",
@@ -54,7 +51,8 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"};
+        "wa", "wo", "n"
+    };
 
     for (std::string &kanaName : kanaNames)
     {
@@ -66,10 +64,27 @@ std::vector<Kana> loadAssets()
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
-        kanas.push_back({kanaName, kanaBounds, actualTexture, actualSound});
+        std::string actualGifPath = hiraganaGifPath + kanaName + gifExtension;
+
+        int animationFrames = 0;
+
+        // Since I'm loading images, the ram consumption will go up.
+        //  Load all GIF animation frames into a single Image
+        //  NOTE: GIF data is always loaded as RGBA (32bit) by default
+        //  NOTE: Frames are just appended one after another in image.data memory
+        Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
+
+        // Load texture from image
+        // NOTE: We will update this texture when required with next frame data
+        // WARNING: It's not recommended to use this technique for sprites animation,
+        // use spritesheets instead, like illustrated in textures_sprite_anim example
+        Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
+
+        kanas.push_back({kanaName, kanaBounds, actualTexture, actualSound, drawKanaTexture, kanaAnimation, animationFrames});
     }
 
     std::string katakanaImgsPath = "assets/img/katakanas/";
+    std::string katakanaGifPath = "assets/gifs/katakanas/";
 
     int actualMaxSize = kanas.size();
 
@@ -81,7 +96,15 @@ std::vector<Kana> loadAssets()
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
-        kanas.push_back({actualAnimation.name, kanaBounds, actualTexture, actualAnimation.sound});
+        std::string actualGifPath = katakanaGifPath + actualAnimation.name + gifExtension;
+
+        int animationFrames = 0;
+
+        Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
+
+        Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
+
+        kanas.push_back({actualAnimation.name, kanaBounds, actualTexture, actualAnimation.sound, drawKanaTexture, kanaAnimation, animationFrames});
     }
 
     return kanas;
@@ -96,8 +119,8 @@ void saveHighScores()
     for (int i = 10; i > 0; i--)
     {
         std::string scoreString = std::to_string(i);
-
         std::string fullScore = name + " " + scoreString;
+        
         highScoresFile << fullScore << "\n";
     }
 
@@ -246,71 +269,7 @@ int main()
     bool showMessage = false;
     bool isAnswerCorrect = false;
 
-    // load kanas animations
-    std::vector<AnimationKana> animationKanas;
-    animationKanas.reserve(92);
-
-    std::vector<std::string> drawKanasName = {
-        "a", "e", "i", "o", "u",
-        "ka", "ki", "ku", "ke", "ko",
-        "sa", "shi", "su", "se", "so",
-        "ta", "chi", "tsu", "te", "to",
-        "na", "ni", "nu", "ne", "no",
-        "ha", "hi", "fu", "he", "ho",
-        "ma", "mi", "mu", "me", "mo",
-        "ya", "yu", "yo", "ra", "ri",
-        "ru", "re", "ro", "wa", "wo", "n"};
-
-    std::string hiraganaGifPath = "assets/gifs/hiraganas/";
-    std::string gifExtension = ".gif";
-
-    for (auto &kanaName : drawKanasName)
-    {
-        std::string actualGifPath = hiraganaGifPath + kanaName + gifExtension;
-
-        int animationFrames = 0;
-
-        // Since I'm loading images, the ram consumption will go up.
-        //  Load all GIF animation frames into a single Image
-        //  NOTE: GIF data is always loaded as RGBA (32bit) by default
-        //  NOTE: Frames are just appended one after another in image.data memory
-        Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
-
-        // Load texture from image
-        // NOTE: We will update this texture when required with next frame data
-        // WARNING: It's not recommended to use this technique for sprites animation,
-        // use spritesheets instead, like illustrated in textures_sprite_anim example
-        Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
-
-        animationKanas.push_back({kanaName, drawKanaTexture, kanaAnimation, animationFrames});
-    }
-
-    std::string katakanaGifPath = "assets/gifs/katakanas/";
-
-    int actualMaxSize = drawKanasName.size();
-
-    for (int i = 0; i < actualMaxSize; i++)
-    {
-        auto kanaName = drawKanasName[i];
-
-        std::string actualGifPath = katakanaGifPath + kanaName + gifExtension;
-
-        int animationFrames = 0;
-
-        Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
-
-        Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
-
-        animationKanas.push_back({kanaName, drawKanaTexture, kanaAnimation, animationFrames});
-    }
-
-    int totalAnimations = animationKanas.size() - 1;
-    int hiraganaAnimationsInitialIndex = 0;
-    int totalHiraganaAnimations = animationKanas.size() / 2 - 1;
-
-    int katakanaAnimationsInitialIndex = totalHiraganaAnimations + 1;
-
-    AnimationKana actualKanaAnimation = animationKanas[0];
+    Kana actualKanaAnimation = kanas[0];
 
     int nextFrameDataOffset = 0;   // Current byte offset to next frame in image.data
     int currentAnimationFrame = 0; // Current animation frame to load and draw
@@ -322,12 +281,10 @@ int main()
         if (isHiraganaMode)
         {
             totalKanas = totalHiraganas;
-            totalAnimations = totalHiraganaAnimations;
         }
         else
         {
             totalKanas = kanas.size() - 1;
-            totalAnimations = animationKanas.size() - 1;
         }
 
         frameCounter++;
@@ -345,7 +302,7 @@ int main()
 
             // Update GPU texture data with next frame image data
             // WARNING: Data size (frame size) and pixel format must match already created texture
-            UpdateTexture(actualKanaAnimation.texture, ((unsigned char *)actualKanaAnimation.image.data) + nextFrameDataOffset);
+            UpdateTexture(actualKanaAnimation.animationTexture, ((unsigned char *)actualKanaAnimation.image.data) + nextFrameDataOffset);
 
             frameCounter = 0;
         }
@@ -466,23 +423,7 @@ int main()
 
         else
         {
-            int actualAnimationInitialIndex = hiraganaAnimationsInitialIndex;
-
-            if (!isHiraganaMode)
-            {
-                actualAnimationInitialIndex = katakanaAnimationsInitialIndex;
-            }
-
-            for (int i = actualAnimationInitialIndex; i < totalAnimations + 1; i++)
-            {
-                auto animationKana = animationKanas[i];
-
-                if (animationKana.name.compare(actualKana.name) == 0)
-                {
-                    actualKanaAnimation = animationKana;
-                    break;
-                }
-            }
+            actualKanaAnimation = actualKana;
 
             if (IsKeyPressed(KEY_SPACE))
             {
@@ -649,7 +590,7 @@ int main()
 
             if (showKanaAnimation)
             {
-                DrawTexture(actualKanaAnimation.texture, GetScreenWidth() / 2 - actualKanaAnimation.texture.width / 2, 40, WHITE);
+                DrawTexture(actualKanaAnimation.animationTexture, GetScreenWidth() / 2 - actualKanaAnimation.animationTexture.width / 2, 40, WHITE);
             }
 
             DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
@@ -719,17 +660,14 @@ int main()
 
     UnloadTexture(muteIconTexture);
     UnloadTexture(soundIconTexture);
+    UnloadTexture(checkIconTexture);
 
     for (auto &kana : kanas)
     {
         UnloadTexture(kana.texture);
+        UnloadTexture(kana.animationTexture);
+        UnloadImage(kana.image);
         // UnloadSound(kana.sound);
-    }
-
-    for (auto &animationKana : animationKanas)
-    {
-        UnloadTexture(animationKana.texture);
-        UnloadImage(animationKana.image);
     }
 
     CloseAudioDevice();
