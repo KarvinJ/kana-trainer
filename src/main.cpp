@@ -9,11 +9,8 @@ const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 544;
 const int MAX_GAME_TIME = 60;
 
-std::string line2;
-
 float gameTimer = MAX_GAME_TIME;
 
-int score = 0;
 int highScore = 0;
 
 typedef struct
@@ -57,8 +54,7 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"
-    };
+        "wa", "wo", "n"};
 
     for (std::string &kanaName : kanaNames)
     {
@@ -91,7 +87,47 @@ std::vector<Kana> loadAssets()
     return kanas;
 }
 
-void saveScore()
+void saveHighScores()
+{
+    std::ofstream highScoresFile("assets/high-scores.txt");
+
+    std::string name = "kar";
+
+    for (int i = 10; i > 0; i--)
+    {
+        std::string scoreString = std::to_string(i);
+
+        std::string fullScore = name + " " + scoreString;
+        highScoresFile << fullScore << "\n";
+    }
+
+    highScoresFile.close();
+}
+
+std::vector<std::string> loadHighScores()
+{
+    std::vector<std::string> scores;
+    scores.reserve(10);
+
+    std::ifstream highScoresFile("assets/high-scores.txt");
+
+    if (!highScoresFile.is_open())
+    {
+        saveHighScores();
+    }
+
+    for (std::string line; getline(highScoresFile, line);)
+    {
+        std::cout << line;
+        scores.push_back(line);
+    }
+
+    highScoresFile.close();
+
+    return scores;
+}
+
+void saveScore(int score)
 {
     std::ofstream highScores("assets/high-score.txt");
 
@@ -102,81 +138,36 @@ void saveScore()
     highScores.close();
 }
 
-void testSave()
-{
-    std::ofstream test("assets/test.txt");
-
-    std::string test2 = "kar";
-
-    for (int i = 1; i < 11; i++)
-    {
-        std::string scoreString = std::to_string(i);
-
-        std::string actualImagePath = test2 + " " + scoreString;
-        test << actualImagePath << "\n";
-    }
-
-    test.close();
-}
-
-void testLoad()
-{
-    std::string testText;
-
-    std::ifstream test("assets/test.txt");
-
-    if (!test.is_open())
-    {
-        testSave();
-    }
-
-    for (std::string line; getline(test, line);)
-    {
-        std::cout << line;
-        line2 = line;
-    }
-
-    test.close();
-}
-
 int loadHighScore()
 {
     std::string highScoreText;
 
-    std::ifstream highScores("assets/high-score.txt");
+    std::ifstream highScoreFile("assets/high-score.txt");
 
-    if (!highScores.is_open())
+    // if the highscore file doesn't exist just create the file and return 0
+    if (!highScoreFile.is_open())
     {
-        saveScore();
-
-        std::ifstream auxHighScores("assets/high-score.txt");
-
-        getline(auxHighScores, highScoreText);
-
-        auxHighScores.close();
-
-        int highScore = stoi(highScoreText);
-
-        return highScore;
+        saveScore(0);
+        return 0;
     }
 
-    getline(highScores, highScoreText);
+    getline(highScoreFile, highScoreText);
 
-    highScores.close();
+    highScoreFile.close();
 
     int highScore = stoi(highScoreText);
 
     return highScore;
 }
 
-void updateHighScore()
+void updateHighScore(int &score)
 {
     score *= gameTimer;
 
     if (score > highScore)
     {
         highScore = score;
-        saveScore();
+        saveScore(score);
 
         gameTimer = MAX_GAME_TIME;
         score = 0;
@@ -213,9 +204,11 @@ int main()
     bool isMute = false;
     bool showKanaAnimation = false;
 
+    int score = 0;
+
     highScore = loadHighScore();
 
-    testLoad();
+    std::vector<std::string> highScores = loadHighScores();
 
     int attempts = 0;
 
@@ -266,8 +259,7 @@ int main()
         "ha", "hi", "fu", "he", "ho",
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo", "ra", "ri",
-        "ru", "re", "ro", "wa", "wo", "n"
-    };
+        "ru", "re", "ro", "wa", "wo", "n"};
 
     std::string hiraganaGifPath = "assets/gifs/hiraganas/";
     std::string gifExtension = ".gif";
@@ -421,7 +413,7 @@ int main()
                 isLearningMode = true;
                 attempts = 0;
                 showScoreTimer = 0;
-                updateHighScore();
+                updateHighScore(score);
             }
 
             if (IsKeyPressed(KEY_SPACE))
@@ -467,7 +459,7 @@ int main()
                     isLearningMode = true;
                     attempts = 0;
                     showScoreTimer = 0;
-                    updateHighScore();
+                    updateHighScore(score);
                 }
             }
         }
@@ -662,7 +654,13 @@ int main()
 
             DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
 
-            // DrawText(line2.c_str(), 90, 350, 20, LIGHTGRAY);
+            // int yPosition = 0;
+
+            // for (auto &highScore : highScores)
+            // {
+            //     DrawText(highScore.c_str(), 90, 350 + yPosition, 20, LIGHTGRAY);
+            //     yPosition += 25;
+            // }
         }
 
         else
