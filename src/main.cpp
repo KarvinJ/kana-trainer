@@ -50,8 +50,7 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"
-    };
+        "wa", "wo", "n"};
 
     for (std::string &kanaName : kanaNames)
     {
@@ -362,6 +361,13 @@ int main()
 
     std::string playerName = loadPlayerName();
 
+    bool isHighScoreScreen = false;
+
+    if (playerName.compare("aaa") == 0)
+    {
+        isHighScoreScreen = true;
+    }
+
     std::vector<std::string> highScores = loadHighScores();
 
     int attempts = 0;
@@ -384,7 +390,6 @@ int main()
 
     bool isLearningMode = true;
     bool isHiraganaMode = true;
-    bool isHighScoreScreen = false;
 
     int previousKanaIndex = 0;
     int actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
@@ -405,7 +410,7 @@ int main()
     int nextFrameDataOffset = 0;   // Current byte offset to next frame in image.data
     int currentAnimationFrame = 0; // Current animation frame to load and draw
     int frameDelay = 8;            // Frame delay to switch between animation frames
-    int animationFrameCounter = 0;          // General frames counter
+    int animationFrameCounter = 0; // General frames counter
 
     while (!WindowShouldClose())
     {
@@ -507,7 +512,11 @@ int main()
                 attempts = 0;
                 showScoreTimer = 0;
 
-                highScores = saveActualHighScores(highScores, score, playerName);
+                if (score > 0)
+                {
+                    highScores = saveActualHighScores(highScores, score, playerName);
+                }
+
                 updateHighScore(score);
             }
 
@@ -555,7 +564,12 @@ int main()
                     isLearningMode = true;
                     attempts = 0;
                     showScoreTimer = 0;
-                    highScores = saveActualHighScores(highScores, score, playerName);
+
+                    if (score > 0)
+                    {
+                        highScores = saveActualHighScores(highScores, score, playerName);
+                    }
+
                     updateHighScore(score);
                 }
             }
