@@ -51,7 +51,8 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"};
+        "wa", "wo", "n"
+    };
 
     for (std::string &kanaName : kanaNames)
     {
@@ -347,6 +348,12 @@ int main()
     Texture2D checkIconTexture = LoadTexture("assets/icons/check-icon.png");
     Rectangle checkIconBounds = {8, 10, (float)checkIconTexture.width, (float)checkIconTexture.height};
 
+    Texture2D highScoresIconTexture = LoadTexture("assets/icons/high-scores-icon.png");
+    Rectangle highScoreIconBounds = {SCREEN_WIDTH - 32, SCREEN_HEIGHT - 32, (float)highScoresIconTexture.width, (float)highScoresIconTexture.height};
+
+    Texture2D backIconTexture = LoadTexture("assets/icons/back-icon.png");
+    Rectangle backIconBounds = {8, SCREEN_HEIGHT - 32, (float)highScoresIconTexture.width, (float)highScoresIconTexture.height};
+
     bool isMute = false;
     bool showKanaAnimation = false;
 
@@ -485,6 +492,11 @@ int main()
             }
         }
 
+        Vector2 mousePosition = GetMousePosition();
+
+        mouseBounds.x = mousePosition.x;
+        mouseBounds.y = mousePosition.y;
+
         std::string actualKanaName = answer;
 
         if (!isLearningMode && !isHighScoreScreen)
@@ -587,11 +599,6 @@ int main()
                 }
             }
 
-            Vector2 mousePosition = GetMousePosition();
-
-            mouseBounds.x = mousePosition.x;
-            mouseBounds.y = mousePosition.y;
-
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, soundIconBounds))
             {
                 isMute = !isMute;
@@ -615,6 +622,11 @@ int main()
                     Kana nextKana = kanas[actualKanaIndex];
                     PlaySound(nextKana.sound);
                 }
+            }
+
+            else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, highScoreIconBounds))
+            {
+                isHighScoreScreen = true;
             }
 
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, actualKana.bounds))
@@ -663,17 +675,25 @@ int main()
             }
         }
 
-        else if (isHighScoreScreen && IsKeyPressed(KEY_SPACE))
+        if (isHighScoreScreen)
         {
-            std::string name = answer;
-            name.pop_back();
-            toLowerCase(name);
-            playerName = name;
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, backIconBounds))
+            {
+                isHighScoreScreen = false;
+            }
 
-            savePlayerName(name);
+            if (IsKeyPressed(KEY_SPACE))
+            {
+                std::string name = answer;
+                name.pop_back();
+                toLowerCase(name);
+                playerName = name;
 
-            answer[0] = '\0';
-            letterCount = 0;
+                savePlayerName(name);
+
+                answer[0] = '\0';
+                letterCount = 0;
+            }
         }
 
         BeginDrawing();
@@ -697,14 +717,14 @@ int main()
                 DrawText("katakana mode", 110, 10, 24, LIGHTGRAY);
             }
 
+            DrawRectangleRounded(soundIconBounds, 0.3, 6, LIGHTGRAY);
+
             if (!isMute)
             {
-                DrawRectangleRounded(soundIconBounds, 0.3, 6, LIGHTGRAY);
                 DrawTexture(soundIconTexture, soundIconBounds.x, soundIconBounds.y, WHITE);
             }
             else
             {
-                DrawRectangleRounded(soundIconBounds, 0.3, 6, LIGHTGRAY);
                 DrawTexture(muteIconTexture, soundIconBounds.x, soundIconBounds.y, WHITE);
             }
 
@@ -732,6 +752,9 @@ int main()
             }
 
             DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
+
+            DrawRectangleRounded(highScoreIconBounds, 0.3, 6, LIGHTGRAY);
+            DrawTexture(highScoresIconTexture, highScoreIconBounds.x, highScoreIconBounds.y, WHITE);
         }
 
         else if (!isLearningMode && !isHighScoreScreen)
@@ -791,6 +814,9 @@ int main()
             {
                 DrawText(("Current Player: " + playerName).c_str(), 90, 500, 20, LIGHTGRAY);
             }
+
+            DrawRectangleRounded(backIconBounds, 0.3, 6, LIGHTGRAY);
+            DrawTexture(backIconTexture, backIconBounds.x, backIconBounds.y, WHITE);
         }
 
         DrawRectangleRec(textBoxBounds, LIGHTGRAY);
@@ -814,6 +840,8 @@ int main()
     UnloadTexture(muteIconTexture);
     UnloadTexture(soundIconTexture);
     UnloadTexture(checkIconTexture);
+    UnloadTexture(highScoresIconTexture);
+    UnloadTexture(backIconTexture);
 
     int index = 0;
     for (auto &kana : kanas)
