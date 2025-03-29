@@ -387,6 +387,7 @@ int main()
     bool isHiraganaMode = true;
     bool isHighScoreScreen = false;
 
+    int previousKanaIndex = 0;
     int actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
 
     Rectangle mouseBounds = {0, 0, 8, 8};
@@ -538,6 +539,7 @@ int main()
                 // clearing the textbox array.
                 answer[0] = '\0';
                 letterCount = 0;
+                previousKanaIndex = actualKanaIndex;
                 if (isHiraganaMode)
                 {
                     actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalKanas);
@@ -781,11 +783,14 @@ int main()
                 else
                 {
                     DrawText("WRONG!", 160, 500, 20, RED);
+
+                    Kana previousKana = kanas[previousKanaIndex];
+                    DrawText(previousKana.name.c_str(), 250, 495, 25, LIME);
                 }
 
                 showMessageTimer += deltaTime;
 
-                if (showMessageTimer > 1)
+                if (showMessageTimer > 2)
                 {
                     showMessageTimer = 0;
                     showMessage = false;
