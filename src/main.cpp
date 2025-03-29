@@ -51,8 +51,7 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"
-    };
+        "wa", "wo", "n"};
 
     for (std::string &kanaName : kanaNames)
     {
@@ -132,9 +131,92 @@ std::vector<std::string> saveInitialHighScores()
 
         placement++;
 
-        highScoresFile << fullScore << "\n";
+        if (i == 1)
+        {
+            highScoresFile << fullScore;
+        }
+        else
+        {
+            highScoresFile << fullScore << "\n";
+        }
 
         scores.push_back(fullScore);
+    }
+
+    highScoresFile.close();
+
+    return scores;
+}
+
+std::string extractLastNChars(std::string const &str, size_t n)
+{
+    if (str.size() < n)
+    {
+        return str;
+    }
+
+    return str.substr(str.size() - n);
+}
+
+std::vector<std::string> saveActualHighScores(std::vector<std::string> highScores, int actualScore, std::string playerName)
+{
+    int totalHighScores = highScores.size() - 1;
+
+    int currentScoreIndex = 0;
+
+    actualScore *= gameTimer;
+
+    for (int i = 0; i <= totalHighScores; i++)
+    {
+        std::string highScore = highScores[i];
+
+        std::string scoreString = extractLastNChars(highScore, 3);
+
+        int score = stoi(scoreString);
+
+        if (actualScore > score)
+        {
+            currentScoreIndex = i;
+            break;
+        }
+    }
+
+    std::vector<std::string> scores;
+    scores.reserve(10);
+
+    std::ofstream highScoresFile("assets/high-scores.txt");
+
+    for (int i = 0; i <= totalHighScores; i++)
+    {
+        std::string placementString = std::to_string(i + 1);
+        std::string scoreString = std::to_string(i * 100);
+        std::string name = "aaa";
+
+        std::string fullScoreString = highScores[i];
+
+        if (i == currentScoreIndex)
+        {
+            scoreString = std::to_string(actualScore);
+            name = playerName;
+            fullScoreString = placementString + "                 " + name + "             " + scoreString;
+        }
+
+        if (i == 0)
+        {
+            std::string scoreString = extractLastNChars(fullScoreString, 3);
+            fullScoreString = placementString + "                  " + name + "             " + scoreString;
+        }
+
+        if (i == totalHighScores)
+        {
+            highScoresFile << fullScoreString;
+        }
+        else
+        {
+            highScoresFile << fullScoreString << "\n";
+        }
+
+        scores.push_back(fullScoreString);
     }
 
     highScoresFile.close();
@@ -412,6 +494,8 @@ int main()
                 isLearningMode = true;
                 attempts = 0;
                 showScoreTimer = 0;
+
+                highScores = saveActualHighScores(highScores, score, playerName);
                 updateHighScore(score);
             }
 
@@ -458,6 +542,7 @@ int main()
                     isLearningMode = true;
                     attempts = 0;
                     showScoreTimer = 0;
+                    highScores = saveActualHighScores(highScores, score, playerName);
                     updateHighScore(score);
                 }
             }
