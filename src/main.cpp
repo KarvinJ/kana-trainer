@@ -10,7 +10,6 @@ const int SCREEN_HEIGHT = 544;
 const int MAX_GAME_TIME = 60;
 
 float gameTimer = MAX_GAME_TIME;
-
 int highScore = 0;
 
 typedef struct
@@ -397,7 +396,7 @@ int main()
 
     Rectangle textBoxBounds = {90, 425, 225, 50};
 
-    int framesCounter = 0;
+    int textBoxFrameCounter = 0;
 
     float showMessageTimer = 0;
     bool showMessage = false;
@@ -406,7 +405,7 @@ int main()
     int nextFrameDataOffset = 0;   // Current byte offset to next frame in image.data
     int currentAnimationFrame = 0; // Current animation frame to load and draw
     int frameDelay = 8;            // Frame delay to switch between animation frames
-    int frameCounter = 0;          // General frames counter
+    int animationFrameCounter = 0;          // General frames counter
 
     while (!WindowShouldClose())
     {
@@ -421,9 +420,9 @@ int main()
 
         Kana actualKana = kanas[actualKanaIndex];
 
-        frameCounter++;
+        animationFrameCounter++;
 
-        if (showKanaAnimation && frameCounter >= frameDelay)
+        if (showKanaAnimation && animationFrameCounter >= frameDelay)
         {
             // Move to next frame
             // NOTE: If final frame is reached we return to first frame
@@ -438,7 +437,7 @@ int main()
             // WARNING: Data size (frame size) and pixel format must match already created texture
             UpdateTexture(actualKana.animationTexture, ((unsigned char *)actualKana.image.data) + nextFrameDataOffset);
 
-            frameCounter = 0;
+            animationFrameCounter = 0;
         }
 
         float deltaTime = GetFrameTime();
@@ -828,12 +827,12 @@ int main()
         DrawRectangleLines((int)textBoxBounds.x, (int)textBoxBounds.y, (int)textBoxBounds.width, (int)textBoxBounds.height, DARKGRAY);
         DrawText(answer, (int)textBoxBounds.x + 5, (int)textBoxBounds.y + 8, 40, DARKGRAY);
 
-        framesCounter++;
+        textBoxFrameCounter++;
 
         if (letterCount < MAX_INPUT_CHARS)
         {
             // Draw blinking underscore char
-            if (((framesCounter / 20) % 2) == 0)
+            if (((textBoxFrameCounter / 20) % 2) == 0)
             {
                 DrawText("_", (int)textBoxBounds.x + 8 + MeasureText(answer, 40), (int)textBoxBounds.y + 12, 40, DARKGRAY);
             }
