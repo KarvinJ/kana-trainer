@@ -67,7 +67,6 @@ std::vector<Kana> loadAssets()
         std::string actualGifPath = hiraganaGifPath + kanaName + gifExtension;
 
         int animationFrames = 0;
-
         // Since I'm loading images, the ram consumption will go up.
         //  Load all GIF animation frames into a single Image
         //  NOTE: GIF data is always loaded as RGBA (32bit) by default
@@ -109,7 +108,7 @@ std::vector<Kana> loadAssets()
     return kanas;
 }
 
-std::vector<std::string> saveInitialHighScoresFile()
+std::vector<std::string> saveInitialHighScores()
 {
     std::vector<std::string> scores;
     scores.reserve(10);
@@ -125,14 +124,14 @@ std::vector<std::string> saveInitialHighScoresFile()
         std::string scoreString = std::to_string(i * 100);
 
         std::string fullScore = placementString + "                 " + name + "             " + scoreString;
-                     
+
         if (placement == 1)
         {
             fullScore = placementString + "                  " + name + "             " + scoreString;
         }
 
         placement++;
-        
+
         highScoresFile << fullScore << "\n";
 
         scores.push_back(fullScore);
@@ -152,7 +151,7 @@ std::vector<std::string> loadHighScores()
 
     if (!highScoresFile.is_open())
     {
-        return saveInitialHighScoresFile();
+        return saveInitialHighScores();
     }
 
     for (std::string line; getline(highScoresFile, line);)
@@ -168,13 +167,39 @@ std::vector<std::string> loadHighScores()
 
 void saveScore(int score)
 {
-    std::ofstream highScores("assets/high-score.txt");
+    std::ofstream highScoreFile("assets/high-score.txt");
 
-    std::string scoreString = std::to_string(score);
+    highScoreFile << std::to_string(score);
 
-    highScores << scoreString;
+    highScoreFile.close();
+}
 
-    highScores.close();
+void savePlayerName(std::string playerName)
+{
+    std::ofstream playerNameFile("assets/player.txt");
+
+    playerNameFile << playerName;
+
+    playerNameFile.close();
+}
+
+std::string loadPlayerName()
+{
+    std::string playerName;
+
+    std::ifstream playerNameFile("assets/player.txt");
+
+    if (!playerNameFile.is_open())
+    {
+        savePlayerName("aaa");
+        return "aaa";
+    }
+
+    getline(playerNameFile, playerName);
+
+    playerNameFile.close();
+
+    return playerName;
 }
 
 int loadHighScore()
@@ -246,6 +271,8 @@ int main()
     int score = 0;
 
     highScore = loadHighScore();
+
+    std::string playerName = loadPlayerName();
 
     std::vector<std::string> highScores = loadHighScores();
 
@@ -551,6 +578,19 @@ int main()
             }
         }
 
+        else if (isHighScoreScreen && IsKeyPressed(KEY_SPACE))
+        {
+            std::string name = answer;
+            name.pop_back();
+            toLowerCase(name);
+            playerName = name;
+
+            savePlayerName(name);
+
+            answer[0] = '\0';
+            letterCount = 0;
+        }
+
         BeginDrawing();
 
         ClearBackground(Color{29, 29, 27, 255});
@@ -645,24 +685,7 @@ int main()
             }
         }
 
-        if (!isHighScoreScreen)
-        {
-            DrawRectangleRec(textBoxBounds, LIGHTGRAY);
-            DrawRectangleLines((int)textBoxBounds.x, (int)textBoxBounds.y, (int)textBoxBounds.width, (int)textBoxBounds.height, DARKGRAY);
-            DrawText(answer, (int)textBoxBounds.x + 5, (int)textBoxBounds.y + 8, 40, DARKGRAY);
-
-            framesCounter++;
-
-            if (letterCount < MAX_INPUT_CHARS)
-            {
-                // Draw blinking underscore char
-                if (((framesCounter / 20) % 2) == 0)
-                {
-                    DrawText("_", (int)textBoxBounds.x + 8 + MeasureText(answer, 40), (int)textBoxBounds.y + 12, 40, DARKGRAY);
-                }
-            }
-        }
-        else
+        if (isHighScoreScreen)
         {
             DrawText("Top Players", 120, 10, 24, LIGHTGRAY);
 
@@ -675,6 +698,28 @@ int main()
             {
                 DrawText(highScore.c_str(), 20, 0 + yPosition, 20, LIGHTGRAY);
                 yPosition += 25;
+            }
+
+            DrawText("WRITE YOUR NAME", 90, 400, 20, LIGHTGRAY);
+
+            if (!playerName.empty())
+            {
+                DrawText(("Current Player: " + playerName).c_str(), 90, 500, 20, LIGHTGRAY);
+            }
+        }
+
+        DrawRectangleRec(textBoxBounds, LIGHTGRAY);
+        DrawRectangleLines((int)textBoxBounds.x, (int)textBoxBounds.y, (int)textBoxBounds.width, (int)textBoxBounds.height, DARKGRAY);
+        DrawText(answer, (int)textBoxBounds.x + 5, (int)textBoxBounds.y + 8, 40, DARKGRAY);
+
+        framesCounter++;
+
+        if (letterCount < MAX_INPUT_CHARS)
+        {
+            // Draw blinking underscore char
+            if (((framesCounter / 20) % 2) == 0)
+            {
+                DrawText("_", (int)textBoxBounds.x + 8 + MeasureText(answer, 40), (int)textBoxBounds.y + 12, 40, DARKGRAY);
             }
         }
 
@@ -692,7 +737,7 @@ int main()
         UnloadTexture(kana.animationTexture);
         UnloadImage(kana.image);
 
-        //I just have sounds loaded for the hiraganas, and for the katakanas I just copied.
+        // I just have sounds loaded for the hiraganas, and for the katakanas I just copied.
         if (index < totalHiraganas)
         {
             UnloadSound(kana.sound);
