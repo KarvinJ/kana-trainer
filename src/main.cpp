@@ -109,21 +109,38 @@ std::vector<Kana> loadAssets()
     return kanas;
 }
 
-void saveHighScores()
+std::vector<std::string> saveInitialHighScoresFile()
 {
+    std::vector<std::string> scores;
+    scores.reserve(10);
+
     std::ofstream highScoresFile("assets/high-scores.txt");
 
-    std::string name = "kar";
+    std::string name = "aaa";
 
-    for (int i = 10; i > 0; i--)
+    int placement = 1;
+    for (int i = 9; i > 0; i--)
     {
-        std::string scoreString = std::to_string(i);
-        std::string fullScore = name + " " + scoreString;
+        std::string placementString = std::to_string(placement);
+        std::string scoreString = std::to_string(i * 100);
+
+        std::string fullScore = placementString + "                 " + name + "             " + scoreString;
+                     
+        if (placement == 1)
+        {
+            fullScore = placementString + "                  " + name + "             " + scoreString;
+        }
+
+        placement++;
         
         highScoresFile << fullScore << "\n";
+
+        scores.push_back(fullScore);
     }
 
     highScoresFile.close();
+
+    return scores;
 }
 
 std::vector<std::string> loadHighScores()
@@ -135,7 +152,7 @@ std::vector<std::string> loadHighScores()
 
     if (!highScoresFile.is_open())
     {
-        saveHighScores();
+        return saveInitialHighScoresFile();
     }
 
     for (std::string line; getline(highScoresFile, line);)
@@ -252,6 +269,7 @@ int main()
 
     bool isLearningMode = true;
     bool isHiraganaMode = true;
+    bool isHighScoreScreen = false;
 
     int actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
 
@@ -360,7 +378,7 @@ int main()
 
         std::string actualKanaName = answer;
 
-        if (!isLearningMode)
+        if (!isLearningMode && !isHighScoreScreen)
         {
             if (gameTimer < 1)
             {
@@ -418,7 +436,7 @@ int main()
             }
         }
 
-        else
+        else if (isLearningMode && !isHighScoreScreen)
         {
             if (IsKeyPressed(KEY_SPACE))
             {
@@ -537,13 +555,13 @@ int main()
 
         ClearBackground(Color{29, 29, 27, 255});
 
-        if (!showKanaAnimation)
+        if (!showKanaAnimation && !isHighScoreScreen)
         {
             DrawRectangleRec(actualKana.bounds, WHITE);
             DrawTexture(actualKana.texture, actualKana.bounds.x, actualKana.bounds.y, WHITE);
         }
 
-        if (isLearningMode)
+        if (isLearningMode && !isHighScoreScreen)
         {
             if (isHiraganaMode)
             {
@@ -589,17 +607,9 @@ int main()
             }
 
             DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
-
-            // int yPosition = 0;
-
-            // for (auto &highScore : highScores)
-            // {
-            //     DrawText(highScore.c_str(), 90, 350 + yPosition, 20, LIGHTGRAY);
-            //     yPosition += 25;
-            // }
         }
 
-        else
+        else if (!isLearningMode && !isHighScoreScreen)
         {
             if (gameTimer > 0)
             {
@@ -635,18 +645,36 @@ int main()
             }
         }
 
-        DrawRectangleRec(textBoxBounds, LIGHTGRAY);
-        DrawRectangleLines((int)textBoxBounds.x, (int)textBoxBounds.y, (int)textBoxBounds.width, (int)textBoxBounds.height, DARKGRAY);
-        DrawText(answer, (int)textBoxBounds.x + 5, (int)textBoxBounds.y + 8, 40, DARKGRAY);
-
-        framesCounter++;
-
-        if (letterCount < MAX_INPUT_CHARS)
+        if (!isHighScoreScreen)
         {
-            // Draw blinking underscore char
-            if (((framesCounter / 20) % 2) == 0)
+            DrawRectangleRec(textBoxBounds, LIGHTGRAY);
+            DrawRectangleLines((int)textBoxBounds.x, (int)textBoxBounds.y, (int)textBoxBounds.width, (int)textBoxBounds.height, DARKGRAY);
+            DrawText(answer, (int)textBoxBounds.x + 5, (int)textBoxBounds.y + 8, 40, DARKGRAY);
+
+            framesCounter++;
+
+            if (letterCount < MAX_INPUT_CHARS)
             {
-                DrawText("_", (int)textBoxBounds.x + 8 + MeasureText(answer, 40), (int)textBoxBounds.y + 12, 40, DARKGRAY);
+                // Draw blinking underscore char
+                if (((framesCounter / 20) % 2) == 0)
+                {
+                    DrawText("_", (int)textBoxBounds.x + 8 + MeasureText(answer, 40), (int)textBoxBounds.y + 12, 40, DARKGRAY);
+                }
+            }
+        }
+        else
+        {
+            DrawText("Top Players", 120, 10, 24, LIGHTGRAY);
+
+            DrawText("Rank", 20, 40, 24, LIGHTGRAY);
+            DrawText("Name", 170, 40, 24, LIGHTGRAY);
+            DrawText("Score", 310, 40, 24, LIGHTGRAY);
+            int yPosition = 70;
+
+            for (auto &highScore : highScores)
+            {
+                DrawText(highScore.c_str(), 20, 0 + yPosition, 20, LIGHTGRAY);
+                yPosition += 25;
             }
         }
 
@@ -657,12 +685,20 @@ int main()
     UnloadTexture(soundIconTexture);
     UnloadTexture(checkIconTexture);
 
+    int index = 0;
     for (auto &kana : kanas)
     {
         UnloadTexture(kana.texture);
         UnloadTexture(kana.animationTexture);
         UnloadImage(kana.image);
-        // UnloadSound(kana.sound);
+
+        //I just have sounds loaded for the hiraganas, and for the katakanas I just copied.
+        if (index < totalHiraganas)
+        {
+            UnloadSound(kana.sound);
+        }
+
+        index++;
     }
 
     CloseAudioDevice();
