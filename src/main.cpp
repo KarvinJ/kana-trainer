@@ -422,7 +422,7 @@ int main()
 
         frameCounter++;
 
-        if (frameCounter >= frameDelay)
+        if (showKanaAnimation && frameCounter >= frameDelay)
         {
             // Move to next frame
             // NOTE: If final frame is reached we return to first frame
