@@ -116,7 +116,7 @@ std::vector<std::string> saveInitialHighScores()
     std::string name = "aaa";
 
     int placement = 1;
-    for (int i = 9; i > 0; i--)
+    for (int i = 8; i > 0; i--)
     {
         std::string placementString = std::to_string(placement);
         std::string scoreString = std::to_string(i * 100);
