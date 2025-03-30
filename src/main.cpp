@@ -1,16 +1,12 @@
 #include <raylib.h>
-#include <vector>
 #include <iostream>
-#include <fstream>
+#include "fileManager.h"
 
 #define MAX_INPUT_CHARS 4
 
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 544;
 const int MAX_GAME_TIME = 60;
-
-float gameTimer = MAX_GAME_TIME;
-int highScore = 0;
 
 typedef struct
 {
@@ -50,7 +46,8 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"};
+        "wa", "wo", "n"
+    };
 
     for (std::string &kanaName : kanaNames)
     {
@@ -106,215 +103,12 @@ std::vector<Kana> loadAssets()
     return kanas;
 }
 
-std::vector<std::string> saveInitialHighScores()
+void updateHighScore(int &score, int &highScore)
 {
-    std::vector<std::string> scores;
-    scores.reserve(10);
-
-    std::ofstream highScoresFile("assets/high-scores.txt");
-
-    std::string name = "aaa";
-
-    int placement = 1;
-    for (int i = 8; i > 0; i--)
-    {
-        std::string placementString = std::to_string(placement);
-        std::string scoreString = std::to_string(i * 100);
-
-        std::string fullScore = placementString + "                 " + name + "             " + scoreString;
-
-        if (placement == 1)
-        {
-            fullScore = placementString + "                  " + name + "             " + scoreString;
-        }
-
-        placement++;
-
-        if (i == 1)
-        {
-            highScoresFile << fullScore;
-        }
-        else
-        {
-            highScoresFile << fullScore << "\n";
-        }
-
-        scores.push_back(fullScore);
-    }
-
-    highScoresFile.close();
-
-    return scores;
-}
-
-std::string extractLastNChars(std::string const &str, size_t n)
-{
-    if (str.size() < n)
-    {
-        return str;
-    }
-
-    return str.substr(str.size() - n);
-}
-
-std::vector<std::string> saveActualHighScores(std::vector<std::string> highScores, int actualScore, std::string playerName)
-{
-    int totalHighScores = highScores.size() - 1;
-
-    int currentScoreIndex = 0;
-
-    actualScore *= gameTimer;
-
-    for (int i = 0; i <= totalHighScores; i++)
-    {
-        std::string highScore = highScores[i];
-
-        std::string scoreString = extractLastNChars(highScore, 3);
-
-        int score = stoi(scoreString);
-
-        if (actualScore > score)
-        {
-            currentScoreIndex = i;
-            break;
-        }
-    }
-
-    std::vector<std::string> scores;
-    scores.reserve(10);
-
-    std::ofstream highScoresFile("assets/high-scores.txt");
-
-    for (int i = 0; i <= totalHighScores; i++)
-    {
-        std::string placementString = std::to_string(i + 1);
-        std::string scoreString = std::to_string(i * 100);
-        std::string name = "aaa";
-
-        std::string fullScoreString = highScores[i];
-
-        if (i == currentScoreIndex)
-        {
-            scoreString = std::to_string(actualScore);
-            name = playerName;
-            fullScoreString = placementString + "                 " + name + "             " + scoreString;
-        }
-
-        if (i == 0)
-        {
-            std::string scoreString = extractLastNChars(fullScoreString, 3);
-            fullScoreString = placementString + "                  " + name + "             " + scoreString;
-        }
-
-        if (i == totalHighScores)
-        {
-            highScoresFile << fullScoreString;
-        }
-        else
-        {
-            highScoresFile << fullScoreString << "\n";
-        }
-
-        scores.push_back(fullScoreString);
-    }
-
-    highScoresFile.close();
-
-    return scores;
-}
-
-std::vector<std::string> loadHighScores()
-{
-    std::vector<std::string> scores;
-    scores.reserve(10);
-
-    std::ifstream highScoresFile("assets/high-scores.txt");
-
-    if (!highScoresFile.is_open())
-    {
-        return saveInitialHighScores();
-    }
-
-    for (std::string line; getline(highScoresFile, line);)
-    {
-        std::cout << line;
-        scores.push_back(line);
-    }
-
-    highScoresFile.close();
-
-    return scores;
-}
-
-void saveScore(int score)
-{
-    std::ofstream highScoreFile("assets/high-score.txt");
-
-    highScoreFile << std::to_string(score);
-
-    highScoreFile.close();
-}
-
-void savePlayerName(std::string playerName)
-{
-    std::ofstream playerNameFile("assets/player.txt");
-
-    playerNameFile << playerName;
-
-    playerNameFile.close();
-}
-
-std::string loadPlayerName()
-{
-    std::string playerName;
-
-    std::ifstream playerNameFile("assets/player.txt");
-
-    if (!playerNameFile.is_open())
-    {
-        savePlayerName("aaa");
-        return "aaa";
-    }
-
-    getline(playerNameFile, playerName);
-
-    playerNameFile.close();
-
-    return playerName;
-}
-
-int loadHighScore()
-{
-    std::string highScoreText;
-
-    std::ifstream highScoreFile("assets/high-score.txt");
-
-    // if the highscore file doesn't exist just create the file and return 0
-    if (!highScoreFile.is_open())
-    {
-        saveScore(0);
-        return 0;
-    }
-
-    getline(highScoreFile, highScoreText);
-
-    highScoreFile.close();
-
-    int highScore = stoi(highScoreText);
-
-    return highScore;
-}
-
-void updateHighScore(int &score)
-{
-    score *= gameTimer;
-
     if (score > highScore)
     {
         highScore = score;
         saveScore(score);
-
-        gameTimer = MAX_GAME_TIME;
         score = 0;
     }
 }
@@ -356,8 +150,9 @@ int main()
     bool showKanaAnimation = false;
 
     int score = 0;
+    float gameTimer = MAX_GAME_TIME;
 
-    highScore = loadHighScore();
+    int highScore = loadHighScore();
 
     std::string playerName = loadPlayerName();
 
@@ -511,13 +306,15 @@ int main()
                 isLearningMode = true;
                 attempts = 0;
                 showScoreTimer = 0;
-
-                if (score > 0)
+                
+                score *= gameTimer;
+                
+                if (score > 100)
                 {
                     highScores = saveActualHighScores(highScores, score, playerName);
+                    updateHighScore(score, highScore);
+                    gameTimer = MAX_GAME_TIME;
                 }
-
-                updateHighScore(score);
             }
 
             if (IsKeyPressed(KEY_SPACE))
@@ -565,12 +362,14 @@ int main()
                     attempts = 0;
                     showScoreTimer = 0;
 
-                    if (score > 0)
+                    score *= gameTimer;
+                    
+                    if (score > 100)
                     {
                         highScores = saveActualHighScores(highScores, score, playerName);
+                        updateHighScore(score, highScore);
+                        gameTimer = MAX_GAME_TIME;
                     }
-
-                    updateHighScore(score);
                 }
             }
         }
@@ -795,10 +594,10 @@ int main()
                 }
                 else
                 {
-                    DrawText("WRONG!", 160, 500, 20, RED);
+                    DrawText("WRONG!", 145, 500, 20, RED);
 
                     Kana previousKana = kanas[previousKanaIndex];
-                    DrawText(previousKana.name.c_str(), 250, 495, 25, LIME);
+                    DrawText(previousKana.name.c_str(), 235, 495, 25, LIME);
                 }
 
                 showMessageTimer += deltaTime;
