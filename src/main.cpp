@@ -1,5 +1,4 @@
 #include <raylib.h>
-#include <iostream>
 #include "fileManager.h"
 
 #define MAX_INPUT_CHARS 4
