@@ -308,7 +308,7 @@ int main()
                 
                 score *= gameTimer;
                 
-                if (score > 100)
+                if (score > 0)
                 {
                     highScores = saveActualHighScores(highScores, score, playerName);
                     updateHighScore(score, highScore);
@@ -363,7 +363,7 @@ int main()
 
                     score *= gameTimer;
                     
-                    if (score > 100)
+                    if (score > 0)
                     {
                         highScores = saveActualHighScores(highScores, score, playerName);
                         updateHighScore(score, highScore);

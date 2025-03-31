@@ -55,7 +55,8 @@ std::vector<std::string> saveActualHighScores(std::vector<std::string> highScore
 {
     int totalHighScores = highScores.size() - 1;
 
-    int currentScoreIndex = 0;
+    // can't use 0 by default, if use 0 a lower score could be save in the first place.
+    int currentScoreIndex = -1;
 
     for (int i = 0; i <= totalHighScores; i++)
     {
