@@ -18,6 +18,113 @@ typedef struct
     int animationFrames;
 } Kana;
 
+std::string handleMissingGifPath(std::string kanaName)
+{
+    auto actualName = kanaName;
+
+    if (actualName.compare("ji") == 0)
+    {
+        actualName = "shi";
+    }
+
+    if (actualName.compare("gi") == 0)
+    {
+        actualName = "ki";
+    }
+
+    else if (actualName.compare("ga") == 0)
+    {
+        actualName = "ka";
+    }
+
+    else if (actualName.compare("ge") == 0)
+    {
+        actualName = "ke";
+    }
+
+    else if (actualName.compare("go") == 0)
+    {
+        actualName = "ko";
+    }
+
+    else if (actualName.compare("gu") == 0)
+    {
+        actualName = "ku";
+    }
+
+    else if (actualName.compare("za") == 0)
+    {
+        actualName = "sa";
+    }
+
+    else if (actualName.compare("ze") == 0)
+    {
+        actualName = "se";
+    }
+
+    else if (actualName.compare("zo") == 0)
+    {
+        actualName = "so";
+    }
+
+    else if (actualName.compare("zu") == 0)
+    {
+        actualName = "su";
+    }
+
+    else if (actualName.compare("da") == 0)
+    {
+        actualName = "ta";
+    }
+
+    else if (actualName.compare("de") == 0)
+    {
+        actualName = "te";
+    }
+
+    else if (actualName.compare("do") == 0)
+    {
+        actualName = "to";
+    }
+
+    else if (actualName.compare("di") == 0)
+    {
+        actualName = "chi";
+    }
+
+    else if (actualName.compare("du") == 0)
+    {
+        actualName = "tsu";
+    }
+
+    else if (actualName.compare("ba") == 0 || actualName.compare("pa") == 0)
+    {
+        actualName = "ha";
+    }
+
+    else if (actualName.compare("bo") == 0 || actualName.compare("po") == 0)
+    {
+        actualName = "ho";
+    }
+
+    else if (actualName.compare("be") == 0 || actualName.compare("pe") == 0)
+    {
+        actualName = "he";
+    }
+
+    else if (actualName.compare("bi") == 0 || actualName.compare("pi") == 0)
+    {
+        actualName = "hi";
+    }
+
+    else if (actualName.compare("bu") == 0 || actualName.compare("pu") == 0)
+    {
+        actualName = "fu";
+    }
+
+    return actualName;
+}
+
 std::vector<Kana> loadAssets()
 {
     std::vector<Kana> kanas;
@@ -45,8 +152,7 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"
-    };
+        "wa", "wo", "n"};
 
     for (std::string &kanaName : kanaNames)
     {
@@ -58,7 +164,9 @@ std::vector<Kana> loadAssets()
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
-        std::string actualGifPath = hiraganaGifPath + kanaName + gifExtension;
+        auto actualName = handleMissingGifPath(kanaName);
+
+        std::string actualGifPath = hiraganaGifPath + actualName + gifExtension;
 
         int animationFrames = 0;
         // Since I'm loading images, the ram consumption will go up.
@@ -89,7 +197,9 @@ std::vector<Kana> loadAssets()
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
-        std::string actualGifPath = katakanaGifPath + actualAnimation.name + gifExtension;
+        auto actualName = handleMissingGifPath(actualAnimation.name);
+
+        std::string actualGifPath = katakanaGifPath + actualName + gifExtension;
 
         int animationFrames = 0;
         Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
@@ -223,20 +333,24 @@ int main()
 
         if (showKanaAnimation && animationFrameCounter >= frameDelay)
         {
-            // Move to next frame
-            // NOTE: If final frame is reached we return to first frame
-            currentAnimationFrame++;
-            if (currentAnimationFrame >= actualKana.animationFrames)
-                currentAnimationFrame = 0;
+            // if actualKana.animationFrames is 0 this means that the gif animation wasn't loaded.
+            if (actualKana.animationFrames > 0)
+            {
+                // Move to next frame
+                // NOTE: If final frame is reached we return to first frame
+                currentAnimationFrame++;
+                if (currentAnimationFrame >= actualKana.animationFrames)
+                    currentAnimationFrame = 0;
 
-            // Get memory offset position for next frame data in image.data
-            nextFrameDataOffset = actualKana.image.width * actualKana.image.height * 4 * currentAnimationFrame;
+                // Get memory offset position for next frame data in image.data
+                nextFrameDataOffset = actualKana.image.width * actualKana.image.height * 4 * currentAnimationFrame;
 
-            // Update GPU texture data with next frame image data
-            // WARNING: Data size (frame size) and pixel format must match already created texture
-            UpdateTexture(actualKana.animationTexture, ((unsigned char *)actualKana.image.data) + nextFrameDataOffset);
+                // Update GPU texture data with next frame image data
+                // WARNING: Data size (frame size) and pixel format must match already created texture
+                UpdateTexture(actualKana.animationTexture, ((unsigned char *)actualKana.image.data) + nextFrameDataOffset);
 
-            animationFrameCounter = 0;
+                animationFrameCounter = 0;
+            }
         }
 
         float deltaTime = GetFrameTime();
@@ -305,9 +419,9 @@ int main()
                 isLearningMode = true;
                 attempts = 0;
                 showScoreTimer = 0;
-                
+
                 score *= gameTimer;
-                
+
                 if (score > 0)
                 {
                     highScores = saveActualHighScores(highScores, score, playerName);
@@ -362,7 +476,7 @@ int main()
                     showScoreTimer = 0;
 
                     score *= gameTimer;
-                    
+
                     if (score > 0)
                     {
                         highScores = saveActualHighScores(highScores, score, playerName);
