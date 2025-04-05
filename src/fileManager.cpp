@@ -2,43 +2,33 @@
 
 std::vector<std::string> saveInitialHighScores()
 {
-    std::vector<std::string> scores;
-    scores.reserve(10);
+    std::vector<std::string> highScores;
+    highScores.reserve(9);
 
     std::ofstream highScoresFile("assets/high-scores.txt");
 
     std::string name = "aaa";
 
-    int placement = 1;
     for (int i = 8; i > 0; i--)
     {
-        std::string placementString = std::to_string(placement);
         std::string scoreString = std::to_string(i * 100);
-
-        std::string fullScore = placementString + "                 " + name + "             " + scoreString;
-
-        if (placement == 1)
-        {
-            fullScore = placementString + "                  " + name + "             " + scoreString;
-        }
-
-        placement++;
+        std::string fullScoreString = "                   " + name + "             " + scoreString;
 
         if (i == 1)
         {
-            highScoresFile << fullScore;
+            highScoresFile << fullScoreString;
         }
         else
         {
-            highScoresFile << fullScore << "\n";
+            highScoresFile << fullScoreString << "\n";
         }
 
-        scores.push_back(fullScore);
+        highScores.push_back(fullScoreString);
     }
 
     highScoresFile.close();
 
-    return scores;
+    return highScores;
 }
 
 std::string extractLastNChars(std::string const &str, size_t n)
@@ -53,12 +43,13 @@ std::string extractLastNChars(std::string const &str, size_t n)
 
 std::vector<std::string> saveActualHighScores(std::vector<std::string> highScores, int actualScore, std::string playerName)
 {
-    int totalHighScores = highScores.size() - 1;
-
     // can't use 0 by default, if use 0 a lower score could be save in the first place.
-    int currentScoreIndex = -1;
+    std::vector<std::string> actualScores;
+    actualScores.reserve(9);
 
-    for (int i = 0; i <= totalHighScores; i++)
+    bool actualScoreAlreadyAdded = false;
+
+    for (size_t i = 0; i < highScores.size(); i++)
     {
         std::string highScore = highScores[i];
 
@@ -66,40 +57,27 @@ std::vector<std::string> saveActualHighScores(std::vector<std::string> highScore
 
         int score = stoi(scoreString);
 
-        if (actualScore > score)
+        if (!actualScoreAlreadyAdded && actualScore > score)
         {
-            currentScoreIndex = i;
-            break;
+            std::string fullScore = "                   " + playerName + "             " + std::to_string(actualScore);
+            actualScores.push_back(fullScore);
+            actualScoreAlreadyAdded = true;
         }
+
+        actualScores.push_back(highScore);
     }
 
-    std::vector<std::string> scores;
-    scores.reserve(10);
+    //remove the last element aka the lowest score.
+    actualScores.pop_back();
 
     std::ofstream highScoresFile("assets/high-scores.txt");
 
-    for (int i = 0; i <= totalHighScores; i++)
+    //I can create a infinite loop and it will create a really big file and create a high ram consumption.
+    for (size_t i = 0; i < actualScores.size(); i++)
     {
-        std::string placementString = std::to_string(i + 1);
-        std::string scoreString = std::to_string(i * 100);
-        std::string name = "aaa";
+        std::string fullScoreString = actualScores[i];
 
-        std::string fullScoreString = highScores[i];
-
-        if (i == currentScoreIndex)
-        {
-            scoreString = std::to_string(actualScore);
-            name = playerName;
-            fullScoreString = placementString + "                 " + name + "             " + scoreString;
-        }
-
-        if (i == 0)
-        {
-            std::string scoreString = extractLastNChars(fullScoreString, 3);
-            fullScoreString = placementString + "                  " + name + "             " + scoreString;
-        }
-
-        if (i == totalHighScores)
+        if (i == actualScores.size() - 1)
         {
             highScoresFile << fullScoreString;
         }
@@ -107,19 +85,17 @@ std::vector<std::string> saveActualHighScores(std::vector<std::string> highScore
         {
             highScoresFile << fullScoreString << "\n";
         }
-
-        scores.push_back(fullScoreString);
     }
 
     highScoresFile.close();
 
-    return scores;
+    return actualScores;
 }
 
 std::vector<std::string> loadHighScores()
 {
     std::vector<std::string> scores;
-    scores.reserve(10);
+    scores.reserve(9);
 
     std::ifstream highScoresFile("assets/high-scores.txt");
 

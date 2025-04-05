@@ -680,7 +680,7 @@ int main()
             }
 
             DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
-
+            
             DrawRectangleRounded(highScoreIconBounds, 0.3, 6, LIGHTGRAY);
             DrawTexture(highScoresIconTexture, highScoreIconBounds.x, highScoreIconBounds.y, WHITE);
         }
@@ -716,7 +716,7 @@ int main()
 
                 showMessageTimer += deltaTime;
 
-                if (showMessageTimer > 2)
+                if (showMessageTimer > 1.5)
                 {
                     showMessageTimer = 0;
                     showMessage = false;
@@ -731,11 +731,15 @@ int main()
             DrawText("Rank", 20, 40, 24, LIGHTGRAY);
             DrawText("Name", 170, 40, 24, LIGHTGRAY);
             DrawText("Score", 310, 40, 24, LIGHTGRAY);
-            int yPosition = 70;
 
+            int yPosition = 70;
+            int placement = 1;
             for (auto &highScore : highScores)
             {
+                DrawText(TextFormat("%i", placement), 20, 0 + yPosition, 20, LIGHTGRAY);
                 DrawText(highScore.c_str(), 20, 0 + yPosition, 20, LIGHTGRAY);
+
+                placement++;
                 yPosition += 25;
             }
 
