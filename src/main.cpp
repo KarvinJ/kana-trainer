@@ -18,9 +18,9 @@ typedef struct
     int animationFrames;
 } Kana;
 
-std::string handleMissingGifPath(std::string kanaName)
+std::string handleMissingGifName(std::string kanaName)
 {
-    auto actualName = kanaName;
+    std::string actualName = kanaName;
 
     if (actualName.compare("ji") == 0)
     {
@@ -152,7 +152,8 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"};
+        "wa", "wo", "n"
+    };
 
     for (std::string &kanaName : kanaNames)
     {
@@ -314,6 +315,8 @@ int main()
 
     while (!WindowShouldClose())
     {
+        int kanasInitialIndex = hiraganasInitialIndex;
+
         if (isHiraganaMode)
         {
             totalKanas = totalHiraganas;
@@ -321,22 +324,16 @@ int main()
         else
         {
             totalKanas = kanas.size() - 1;
+            kanasInitialIndex = katakanasInitialIndex;
         }
 
         Kana actualKana = kanas[actualKanaIndex];
 
-        int actualInitialIndex = hiraganasInitialIndex;
-
-        if (!isHiraganaMode)
-        {
-            actualInitialIndex = katakanasInitialIndex;
-        }
-
         Kana actualAnimationKana;
 
-        for (int i = actualInitialIndex; i < totalKanas + 1; i++)
+        for (int i = kanasInitialIndex; i < totalKanas + 1; i++)
         {
-            auto actualName = handleMissingGifPath(actualKana.name);
+            auto actualName = handleMissingGifName(actualKana.name);
 
             if (kanas[i].name.compare(actualName) == 0)
             {
@@ -349,24 +346,19 @@ int main()
 
         if (showKanaAnimation && animationFrameCounter >= frameDelay)
         {
-            // if actualKana.animationFrames is 0 this means that the gif animation wasn't loaded.
-            if (actualAnimationKana.animationFrames > 0)
-            {
-                // Move to next frame
-                // NOTE: If final frame is reached we return to first frame
-                currentAnimationFrame++;
-                if (currentAnimationFrame >= actualAnimationKana.animationFrames)
-                    currentAnimationFrame = 0;
+            // Move to next frame. NOTE: If final frame is reached we return to first frame
+            currentAnimationFrame++;
+            if (currentAnimationFrame >= actualAnimationKana.animationFrames)
+                currentAnimationFrame = 0;
 
-                // Get memory offset position for next frame data in image.data
-                nextFrameDataOffset = actualAnimationKana.image.width * actualAnimationKana.image.height * 4 * currentAnimationFrame;
+            // Get memory offset position for next frame data in image.data
+            nextFrameDataOffset = actualAnimationKana.image.width * actualAnimationKana.image.height * 4 * currentAnimationFrame;
 
-                // Update GPU texture data with next frame image data
-                // WARNING: Data size (frame size) and pixel format must match already created texture
-                UpdateTexture(actualAnimationKana.animationTexture, ((unsigned char *)actualAnimationKana.image.data) + nextFrameDataOffset);
+            // Update GPU texture data with next frame image data
+            // WARNING: Data size (frame size) and pixel format must match already created texture
+            UpdateTexture(actualAnimationKana.animationTexture, ((unsigned char *)actualAnimationKana.image.data) + nextFrameDataOffset);
 
-                animationFrameCounter = 0;
-            }
+            animationFrameCounter = 0;
         }
 
         float deltaTime = GetFrameTime();
