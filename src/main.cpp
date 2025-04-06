@@ -152,8 +152,7 @@ std::vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"
-    };
+        "wa", "wo", "n"};
 
     for (std::string &kanaName : kanaNames)
     {
@@ -165,9 +164,7 @@ std::vector<Kana> loadAssets()
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
-        auto actualName = handleMissingGifPath(kanaName);
-
-        std::string actualGifPath = hiraganaGifPath + actualName + gifExtension;
+        std::string actualGifPath = hiraganaGifPath + kanaName + gifExtension;
 
         int animationFrames = 0;
         // Since I'm loading images, the ram consumption will go up.
@@ -192,22 +189,20 @@ std::vector<Kana> loadAssets()
 
     for (int i = 0; i < actualMaxSize; i++)
     {
-        auto actualAnimation = kanas[i];
+        auto actualKana = kanas[i];
 
-        std::string actualImagePath = katakanaImgsPath + actualAnimation.name + imageExtension;
+        std::string actualImagePath = katakanaImgsPath + actualKana.name + imageExtension;
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
-        auto actualName = handleMissingGifPath(actualAnimation.name);
-
-        std::string actualGifPath = katakanaGifPath + actualName + gifExtension;
+        std::string actualGifPath = katakanaGifPath + actualKana.name + gifExtension;
 
         int animationFrames = 0;
         Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
 
         Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
 
-        kanas.push_back({actualAnimation.name, kanaBounds, actualTexture, actualAnimation.sound, drawKanaTexture, kanaAnimation, animationFrames});
+        kanas.push_back({actualKana.name, kanaBounds, actualTexture, actualKana.sound, drawKanaTexture, kanaAnimation, animationFrames});
     }
 
     return kanas;
@@ -330,25 +325,45 @@ int main()
 
         Kana actualKana = kanas[actualKanaIndex];
 
+        int actualInitialIndex = hiraganasInitialIndex;
+
+        if (!isHiraganaMode)
+        {
+            actualInitialIndex = katakanasInitialIndex;
+        }
+
+        Kana actualAnimationKana;
+
+        for (int i = actualInitialIndex; i < totalKanas + 1; i++)
+        {
+            auto actualName = handleMissingGifPath(actualKana.name);
+
+            if (kanas[i].name.compare(actualName) == 0)
+            {
+                actualAnimationKana = kanas[i];
+                break;
+            }
+        }
+
         animationFrameCounter++;
 
         if (showKanaAnimation && animationFrameCounter >= frameDelay)
         {
             // if actualKana.animationFrames is 0 this means that the gif animation wasn't loaded.
-            if (actualKana.animationFrames > 0)
+            if (actualAnimationKana.animationFrames > 0)
             {
                 // Move to next frame
                 // NOTE: If final frame is reached we return to first frame
                 currentAnimationFrame++;
-                if (currentAnimationFrame >= actualKana.animationFrames)
+                if (currentAnimationFrame >= actualAnimationKana.animationFrames)
                     currentAnimationFrame = 0;
 
                 // Get memory offset position for next frame data in image.data
-                nextFrameDataOffset = actualKana.image.width * actualKana.image.height * 4 * currentAnimationFrame;
+                nextFrameDataOffset = actualAnimationKana.image.width * actualAnimationKana.image.height * 4 * currentAnimationFrame;
 
                 // Update GPU texture data with next frame image data
                 // WARNING: Data size (frame size) and pixel format must match already created texture
-                UpdateTexture(actualKana.animationTexture, ((unsigned char *)actualKana.image.data) + nextFrameDataOffset);
+                UpdateTexture(actualAnimationKana.animationTexture, ((unsigned char *)actualAnimationKana.image.data) + nextFrameDataOffset);
 
                 animationFrameCounter = 0;
             }
@@ -676,11 +691,11 @@ int main()
 
             if (showKanaAnimation)
             {
-                DrawTexture(actualKana.animationTexture, GetScreenWidth() / 2 - actualKana.animationTexture.width / 2, 40, WHITE);
+                DrawTexture(actualAnimationKana.animationTexture, GetScreenWidth() / 2 - actualAnimationKana.animationTexture.width / 2, 40, WHITE);
             }
 
             DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
-            
+
             DrawRectangleRounded(highScoreIconBounds, 0.3, 6, LIGHTGRAY);
             DrawTexture(highScoresIconTexture, highScoreIconBounds.x, highScoreIconBounds.y, WHITE);
         }
