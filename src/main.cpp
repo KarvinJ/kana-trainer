@@ -191,7 +191,7 @@ int main()
             answer[letterCount] = '\0';
         }
 
-        if (IsKeyPressed(KEY_ENTER))
+        if (!isHighScoreScreen && IsKeyPressed(KEY_ENTER))
         {
             isLearningMode = !isLearningMode;
             showKanaAnimation = false;
@@ -423,9 +423,12 @@ int main()
                 std::string name = answer;
                 name.pop_back();
                 toLowerCase(name);
-                playerName = name;
 
-                savePlayerName(name);
+                if (!name.empty())
+                {
+                    playerName = name;
+                    savePlayerName(name);
+                }
 
                 answer[0] = '\0';
                 letterCount = 0;
