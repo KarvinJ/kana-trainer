@@ -17,7 +17,6 @@ void updateHighScore(int &score, int &highScore)
     }
 }
 
-// me trae recuerdos de fundamentos de programacion
 void toLowerCase(std::string &string)
 {
     // Manual converting each character to lowercase using ASCII values
@@ -68,6 +67,8 @@ int main()
     }
 
     std::vector<std::string> highScores = loadHighScores();
+
+    std::vector<HighScore> fullScores = getFullScoreData(highScores);
 
     int attempts = 0;
 
@@ -231,6 +232,7 @@ int main()
                 if (score > 0)
                 {
                     highScores = saveActualHighScores(highScores, score, playerName);
+                    fullScores = getFullScoreData(highScores);
                     updateHighScore(score, highScore);
                     gameTimer = MAX_GAME_TIME;
                 }
@@ -286,6 +288,7 @@ int main()
                     if (score > 0)
                     {
                         highScores = saveActualHighScores(highScores, score, playerName);
+                        fullScores = getFullScoreData(highScores);
                         updateHighScore(score, highScore);
                         gameTimer = MAX_GAME_TIME;
                     }
@@ -538,13 +541,11 @@ int main()
             DrawText("Score", 310, 40, 24, LIGHTGRAY);
 
             int yPosition = 70;
-            int placement = 1;
-            for (auto &highScore : highScores)
+            for (auto &fullScore : fullScores)
             {
-                DrawText(TextFormat("%i", placement), 20, 0 + yPosition, 20, LIGHTGRAY);
-                DrawText(highScore.c_str(), 20, 0 + yPosition, 20, LIGHTGRAY);
-
-                placement++;
+                DrawText(TextFormat("%i", fullScore.rank), 20, 0 + yPosition, 20, LIGHTGRAY);
+                DrawText(fullScore.name.c_str(), 170, 0 + yPosition, 20, LIGHTGRAY);
+                DrawText(TextFormat("%i", fullScore.score), 310, 0 + yPosition, 20, LIGHTGRAY);
                 yPosition += 25;
             }
 

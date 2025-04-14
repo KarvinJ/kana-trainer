@@ -12,7 +12,7 @@ std::vector<std::string> saveInitialHighScores()
     for (int i = 8; i > 0; i--)
     {
         std::string scoreString = std::to_string(i * 100);
-        std::string fullScoreString = "                   " + name + "             " + scoreString;
+        std::string fullScoreString = name + "             " + scoreString;
 
         if (i == 1)
         {
@@ -41,6 +41,27 @@ std::string extractLastNChars(std::string const &str, size_t n)
     return str.substr(str.size() - n);
 }
 
+std::vector<HighScore> getFullScoreData(std::vector<std::string> highScores)
+{
+    std::vector<HighScore> scores;
+    scores.reserve(9);
+
+    int rank = 1;
+
+    for (auto &highScore: highScores)
+    {
+        std::string scoreString = extractLastNChars(highScore, 3);
+        int score = stoi(scoreString);
+
+        std::string nameString = highScore.substr(0,3);
+        
+        scores.push_back({rank, nameString, score});
+        rank++;
+    }
+    
+    return scores;
+}
+
 std::vector<std::string> saveActualHighScores(std::vector<std::string> highScores, int actualScore, std::string playerName)
 {
     std::vector<std::string> actualScores;
@@ -58,7 +79,7 @@ std::vector<std::string> saveActualHighScores(std::vector<std::string> highScore
 
         if (!actualScoreWasAdded && actualScore > score)
         {
-            std::string fullScore = "                   " + playerName + "             " + std::to_string(actualScore);
+            std::string fullScore = playerName + "             " + std::to_string(actualScore);
             actualScores.push_back(fullScore);
             actualScoreWasAdded = true;
         }
