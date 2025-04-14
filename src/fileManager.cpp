@@ -53,7 +53,7 @@ std::vector<HighScore> getFullScoreData(std::vector<std::string> highScores)
         std::string scoreString = extractLastNChars(highScore, 3);
         int score = stoi(scoreString);
 
-        std::string nameString = highScore.substr(0,3);
+        std::string nameString = highScore.substr(0, 3);
         
         scores.push_back({rank, nameString, score});
         rank++;
