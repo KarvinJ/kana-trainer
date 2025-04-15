@@ -198,6 +198,8 @@ int main()
             score = 0;
             attempts = 0;
             gameTimer = MAX_GAME_TIME;
+            showMessageTimer = 0;
+            showMessage = false;
 
             answer[0] = '\0';
             letterCount = 0;
