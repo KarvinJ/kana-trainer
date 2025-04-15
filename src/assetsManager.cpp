@@ -1,18 +1,21 @@
 #include "assetsManager.h"
 
-std::vector<Kana> loadAssets()
+using std::vector;
+using std::string;
+
+vector<Kana> loadAssets()
 {
-    std::vector<Kana> kanas;
+    vector<Kana> kanas;
     kanas.reserve(142);
 
-    std::string audioPath = "assets/sounds/";
-    std::string hiraganaImgsPath = "assets/img/hiraganas/";
-    std::string audioExtension = ".mp3";
-    std::string imageExtension = ".png";
-    std::string hiraganaGifPath = "assets/gifs/hiraganas/";
-    std::string gifExtension = ".gif";
+    string audioPath = "assets/sounds/";
+    string hiraganaImgsPath = "assets/img/hiraganas/";
+    string audioExtension = ".mp3";
+    string imageExtension = ".png";
+    string hiraganaGifPath = "assets/gifs/hiraganas/";
+    string gifExtension = ".gif";
 
-    std::string kanaNames[] = {
+    string kanaNames[] = {
         "a", "e", "i", "o", "u",
         "ka", "ga", "ki", "gi", "ku",
         "gu", "ke", "ge", "ko", "go",
@@ -30,17 +33,17 @@ std::vector<Kana> loadAssets()
         "wa", "wo", "n"
     };
 
-    for (std::string &kanaName : kanaNames)
+    for (string &kanaName : kanaNames)
     {
-        std::string actualAudioPath = audioPath + kanaName + audioExtension;
+        string actualAudioPath = audioPath + kanaName + audioExtension;
         Sound actualSound = LoadSound(actualAudioPath.c_str());
         SetSoundVolume(actualSound, 0.8);
 
-        std::string actualImagePath = hiraganaImgsPath + kanaName + imageExtension;
+        string actualImagePath = hiraganaImgsPath + kanaName + imageExtension;
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
-        std::string actualGifPath = hiraganaGifPath + kanaName + gifExtension;
+        string actualGifPath = hiraganaGifPath + kanaName + gifExtension;
 
         int animationFrames = 0;
         // Since I'm loading images, the ram consumption will go up.
@@ -58,8 +61,8 @@ std::vector<Kana> loadAssets()
         kanas.push_back({kanaName, kanaBounds, actualTexture, actualSound, drawKanaTexture, kanaAnimation, animationFrames});
     }
 
-    std::string katakanaImgsPath = "assets/img/katakanas/";
-    std::string katakanaGifPath = "assets/gifs/katakanas/";
+    string katakanaImgsPath = "assets/img/katakanas/";
+    string katakanaGifPath = "assets/gifs/katakanas/";
 
     int actualMaxSize = kanas.size();
 
@@ -67,11 +70,11 @@ std::vector<Kana> loadAssets()
     {
         auto actualKana = kanas[i];
 
-        std::string actualImagePath = katakanaImgsPath + actualKana.name + imageExtension;
+        string actualImagePath = katakanaImgsPath + actualKana.name + imageExtension;
         Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
         Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
 
-        std::string actualGifPath = katakanaGifPath + actualKana.name + gifExtension;
+        string actualGifPath = katakanaGifPath + actualKana.name + gifExtension;
 
         int animationFrames = 0;
         Image kanaAnimation = LoadImageAnim(actualGifPath.c_str(), &animationFrames);
@@ -84,9 +87,9 @@ std::vector<Kana> loadAssets()
     return kanas;
 }
 
-std::string handleMissingGifName(std::string kanaName)
+string handleMissingGifName(string kanaName)
 {
-    std::string actualName = kanaName;
+    string actualName = kanaName;
 
     if (actualName.compare("ji") == 0)
     {

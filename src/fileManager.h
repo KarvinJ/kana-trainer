@@ -1,29 +1,33 @@
 #pragma once
 
 #include <vector>
-#include <fstream>
+#include <string>
+
+//with usings I can remove the need to the of the extra typing string, vector, etc..
+using std::vector;
+using std::string;
 
 typedef struct
 {
     int rank;
-    std::string name;
+    string name;
     int score;
 } HighScore;
 
-std::vector<std::string> saveInitialHighScores();
+vector<string> saveInitialHighScores();
 
-std::string extractLastNChars(std::string const &str, size_t n);
+string extractLastNChars(string const &str, size_t n);
 
-std::vector<HighScore> getFullScoreData(std::vector<std::string> highScores);
+vector<HighScore> getFullScoreData(vector<string> highScores);
 
-std::vector<std::string> saveActualHighScores(std::vector<std::string> highScores, int actualScore, std::string playerName);
+vector<string> saveActualHighScores(vector<string> highScores, int actualScore, string playerName);
 
-std::vector<std::string> loadHighScores();
+vector<string> loadHighScores();
 
 void saveScore(int score);
 
-void savePlayerName(std::string playerName);
+void savePlayerName(string playerName);
 
-std::string loadPlayerName();
+string loadPlayerName();
 
 int loadHighScore();

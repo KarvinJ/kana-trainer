@@ -17,7 +17,7 @@ void updateHighScore(int &score, int &highScore)
     }
 }
 
-void toLowerCase(std::string &string)
+void toLowerCase(string &string)
 {
     // Manual converting each character to lowercase using ASCII values
     for (char &character : string)
@@ -57,7 +57,7 @@ int main()
 
     int highScore = loadHighScore();
 
-    std::string playerName = loadPlayerName();
+    string playerName = loadPlayerName();
 
     bool isHighScoreScreen = false;
 
@@ -66,9 +66,9 @@ int main()
         isHighScoreScreen = true;
     }
 
-    std::vector<std::string> highScores = loadHighScores();
+    vector<string> highScores = loadHighScores();
 
-    std::vector<HighScore> fullScores = getFullScoreData(highScores);
+    vector<HighScore> fullScores = getFullScoreData(highScores);
 
     int attempts = 0;
 
@@ -78,7 +78,7 @@ int main()
 
     InitAudioDevice();
 
-    std::vector<Kana> kanas = loadAssets();
+    vector<Kana> kanas = loadAssets();
 
     // there are 71 hiragana + 71 katakanas = 142.
     int totalKanas = kanas.size() - 1;
@@ -219,7 +219,7 @@ int main()
         mouseBounds.x = mousePosition.x;
         mouseBounds.y = mousePosition.y;
 
-        std::string actualKanaName = answer;
+        string actualKanaName = answer;
 
         if (!isLearningMode && !isHighScoreScreen)
         {
@@ -422,7 +422,7 @@ int main()
 
             if (IsKeyPressed(KEY_SPACE))
             {
-                std::string name = answer;
+                string name = answer;
                 name.pop_back();
                 toLowerCase(name);
 
