@@ -1,4 +1,9 @@
 *.exe
 *.dsym
 *.txt
+*.data
+*.wasm
+*.js
+*.html
 /.vscode
+/web/assets
