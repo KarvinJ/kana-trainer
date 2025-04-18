@@ -2,6 +2,7 @@
 #include "fileManager.h"
 
 #define MAX_INPUT_CHARS 4
+// #define MAX_INPUT_CHARS 5 for the web build
 
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 544;
