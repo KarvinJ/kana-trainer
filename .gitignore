@@ -1,9 +1,10 @@
 *.exe
 *.dsym
-*.txt
 *.data
 *.wasm
 *.js
 *.html
+/assets/high-score.txt
+/assets/high-scores.txt
+/assets/player.txt
 /.vscode
-/web/assets
