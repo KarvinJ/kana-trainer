@@ -1,5 +1,6 @@
 #include "assetsManager.h"
 #include "fileManager.h"
+#include <iostream>
 
 #define MAX_INPUT_CHARS 4
 // #define MAX_INPUT_CHARS 5 for the web build
@@ -112,6 +113,13 @@ int main()
     int currentAnimationFrame = 0; // Current animation frame to load and draw
     int frameDelay = 8;            // Frame delay to switch between animation frames
     int animationFrameCounter = 0; // General frames counter
+
+    // vector<TextureInfo> data = loadSpriteSheet();
+
+    // for (auto &i : data)
+    // {
+    //     std::cout << i.name << std::endl;
+    // }
 
     while (!WindowShouldClose())
     {
