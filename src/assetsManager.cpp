@@ -1,7 +1,5 @@
 #include "assetsManager.h"
-
-using std::vector;
-using std::string;
+#include <fstream>
 
 vector<Kana> loadAssets()
 {
@@ -9,9 +7,7 @@ vector<Kana> loadAssets()
     kanas.reserve(142);
 
     string audioPath = "assets/sounds/";
-    string hiraganaImgsPath = "assets/img/hiraganas/";
     string audioExtension = ".mp3";
-    string imageExtension = ".png";
     string hiraganaGifPath = "assets/gifs/hiraganas/";
     string gifExtension = ".gif";
 
@@ -39,10 +35,6 @@ vector<Kana> loadAssets()
         Sound actualSound = LoadSound(actualAudioPath.c_str());
         SetSoundVolume(actualSound, 0.8);
 
-        string actualImagePath = hiraganaImgsPath + kanaName + imageExtension;
-        Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
-        Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
-
         string actualGifPath = hiraganaGifPath + kanaName + gifExtension;
 
         int animationFrames = 0;
@@ -58,10 +50,9 @@ vector<Kana> loadAssets()
         // use spritesheets instead, like illustrated in textures_sprite_anim example
         Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
 
-        kanas.push_back({kanaName, kanaBounds, actualTexture, actualSound, drawKanaTexture, kanaAnimation, animationFrames});
+        kanas.push_back({kanaName, actualSound, drawKanaTexture, kanaAnimation, animationFrames});
     }
 
-    string katakanaImgsPath = "assets/img/katakanas/";
     string katakanaGifPath = "assets/gifs/katakanas/";
 
     int actualMaxSize = kanas.size();
@@ -70,10 +61,6 @@ vector<Kana> loadAssets()
     {
         auto actualKana = kanas[i];
 
-        string actualImagePath = katakanaImgsPath + actualKana.name + imageExtension;
-        Texture2D actualTexture = LoadTexture(actualImagePath.c_str());
-        Rectangle kanaBounds = {40, 40, (float)actualTexture.width, (float)actualTexture.height};
-
         string actualGifPath = katakanaGifPath + actualKana.name + gifExtension;
 
         int animationFrames = 0;
@@ -81,10 +68,77 @@ vector<Kana> loadAssets()
 
         Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
 
-        kanas.push_back({actualKana.name, kanaBounds, actualTexture, actualKana.sound, drawKanaTexture, kanaAnimation, animationFrames});
+        kanas.push_back({actualKana.name, actualKana.sound, drawKanaTexture, kanaAnimation, animationFrames});
     }
 
     return kanas;
+}
+
+vector<string> customSplit(string &str, char separator)
+{
+    vector<string> strings;
+
+    int startIndex = 0, endIndex = 0;
+    for (size_t i = 0; i <= str.size(); i++)
+    {
+        // If we reached the end of the word or the end of the input.
+        if (str[i] == separator || i == str.size())
+        {
+            endIndex = i;
+            string temp;
+            temp.append(str, startIndex, endIndex - startIndex);
+            strings.push_back(temp);
+            startIndex = endIndex + 1;
+        }
+    }
+
+    return strings;
+}
+
+vector<TextureInfo> loadKanas()
+{
+    vector<TextureInfo> textureInfo;
+    textureInfo.reserve(142);
+
+    std::ifstream hiraganaTextureInfoFile("assets/img/hiraganas/hiraganas.txt");
+
+    for (string line; getline(hiraganaTextureInfoFile, line);)
+    {
+        auto list = customSplit(line, ',');
+
+        string name = list[0];
+        int x = stoi(list[1]);
+        int y = stoi(list[2]);
+        int width = stoi(list[3]);
+        int height = stoi(list[4]);
+
+        Rectangle bounds = {(float)x, (float)y, (float)width, (float)height};
+
+        textureInfo.push_back({name, bounds, true});
+    }
+
+    hiraganaTextureInfoFile.close();
+
+    std::ifstream katakanaTextureInfoFile("assets/img/katakanas/katakanas.txt");
+
+    for (string line; getline(katakanaTextureInfoFile, line);)
+    {
+        auto list = customSplit(line, ',');
+
+        string name = list[0];
+        int x = stoi(list[1]);
+        int y = stoi(list[2]);
+        int width = stoi(list[3]);
+        int height = stoi(list[4]);
+
+        Rectangle bounds = {(float)x, (float)y, (float)width, (float)height};
+
+        textureInfo.push_back({name, bounds, false});
+    }
+
+    katakanaTextureInfoFile.close();
+
+    return textureInfo;
 }
 
 string handleMissingGifName(string kanaName)

@@ -80,7 +80,11 @@ int main()
 
     InitAudioDevice();
 
-    vector<Kana> kanas = loadAssets();
+    Texture2D hiraganaSpriteSheet = LoadTexture("assets/img/hiraganas/hiraganas.png");
+    Texture2D katakanaSpriteSheet = LoadTexture("assets/img/katakanas/katakanas.png");
+
+    // vector<Kana> extraKanas = loadAssets();
+    vector<TextureInfo> kanas = loadKanas();
 
     // there are 71 hiragana + 71 katakanas = 142.
     int totalKanas = kanas.size() - 1;
@@ -114,13 +118,6 @@ int main()
     int frameDelay = 8;            // Frame delay to switch between animation frames
     int animationFrameCounter = 0; // General frames counter
 
-    // vector<TextureInfo> data = loadSpriteSheet();
-
-    // for (auto &i : data)
-    // {
-    //     std::cout << i.name << std::endl;
-    // }
-
     while (!WindowShouldClose())
     {
         int kanasInitialIndex = hiraganasInitialIndex;
@@ -135,39 +132,39 @@ int main()
             kanasInitialIndex = katakanasInitialIndex;
         }
 
-        Kana actualKana = kanas[actualKanaIndex];
+        TextureInfo actualKana = kanas[actualKanaIndex];
 
-        Kana actualAnimationKana;
+        // Kana actualAnimationKana;
 
-        for (int i = kanasInitialIndex; i < totalKanas + 1; i++)
-        {
-            auto actualName = handleMissingGifName(actualKana.name);
+        // for (int i = kanasInitialIndex; i < totalKanas + 1; i++)
+        // {
+        //     auto actualName = handleMissingGifName(actualKana.name);
 
-            if (kanas[i].name.compare(actualName) == 0)
-            {
-                actualAnimationKana = kanas[i];
-                break;
-            }
-        }
+        //     if (kanas[i].name.compare(actualName) == 0)
+        //     {
+        //         actualAnimationKana = kanas[i];
+        //         break;
+        //     }
+        // }
 
-        animationFrameCounter++;
+        // animationFrameCounter++;
 
-        if (showKanaAnimation && animationFrameCounter >= frameDelay)
-        {
-            // Move to next frame. NOTE: If final frame is reached we return to first frame
-            currentAnimationFrame++;
-            if (currentAnimationFrame >= actualAnimationKana.animationFrames)
-                currentAnimationFrame = 0;
+        // if (showKanaAnimation && animationFrameCounter >= frameDelay)
+        // {
+        //     // Move to next frame. NOTE: If final frame is reached we return to first frame
+        //     currentAnimationFrame++;
+        //     if (currentAnimationFrame >= actualAnimationKana.animationFrames)
+        //         currentAnimationFrame = 0;
 
-            // Get memory offset position for next frame data in image.data
-            nextFrameDataOffset = actualAnimationKana.image.width * actualAnimationKana.image.height * 4 * currentAnimationFrame;
+        //     // Get memory offset position for next frame data in image.data
+        //     nextFrameDataOffset = actualAnimationKana.image.width * actualAnimationKana.image.height * 4 * currentAnimationFrame;
 
-            // Update GPU texture data with next frame image data
-            // WARNING: Data size (frame size) and pixel format must match already created texture
-            UpdateTexture(actualAnimationKana.animationTexture, ((unsigned char *)actualAnimationKana.image.data) + nextFrameDataOffset);
+        //     // Update GPU texture data with next frame image data
+        //     // WARNING: Data size (frame size) and pixel format must match already created texture
+        //     UpdateTexture(actualAnimationKana.animationTexture, ((unsigned char *)actualAnimationKana.image.data) + nextFrameDataOffset);
 
-            animationFrameCounter = 0;
-        }
+        //     animationFrameCounter = 0;
+        // }
 
         float deltaTime = GetFrameTime();
 
@@ -268,7 +265,7 @@ int main()
 
                 if (!isMute)
                 {
-                    PlaySound(actualKana.sound);
+                    // PlaySound(actualKana.sound);
                 }
 
                 showMessage = true;
@@ -341,7 +338,7 @@ int main()
 
                 if (soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
                 {
-                    PlaySound(actualKana.sound);
+                    // PlaySound(actualKana.sound);
                     soundTimer = 0;
                 }
             }
@@ -366,8 +363,8 @@ int main()
 
                 if (!isMute)
                 {
-                    Kana nextKana = kanas[actualKanaIndex];
-                    PlaySound(nextKana.sound);
+                    // TextureInfo nextKana = kanas[actualKanaIndex];
+                    // PlaySound(nextKana.sound);
                 }
             }
 
@@ -396,8 +393,8 @@ int main()
 
                 if (!isMute)
                 {
-                    Kana nextKana = kanas[actualKanaIndex];
-                    PlaySound(nextKana.sound);
+                    // TextureInfo nextKana = kanas[actualKanaIndex];
+                    // PlaySound(nextKana.sound);
                 }
             }
 
@@ -416,8 +413,8 @@ int main()
 
                 if (!isMute)
                 {
-                    Kana nextKana = kanas[actualKanaIndex];
-                    PlaySound(nextKana.sound);
+                    // TextureInfo nextKana = kanas[actualKanaIndex];
+                    // PlaySound(nextKana.sound);
                 }
             }
         }
@@ -452,8 +449,16 @@ int main()
 
         if (!showKanaAnimation && !isHighScoreScreen)
         {
-            DrawRectangleRec(actualKana.bounds, WHITE);
-            DrawTexture(actualKana.texture, actualKana.bounds.x, actualKana.bounds.y, WHITE);
+            DrawRectangle(40, 40, 320, 268, WHITE);
+
+            if (isHiraganaMode)
+            {
+                DrawTextureRec(hiraganaSpriteSheet, actualKana.bounds, {40, 40}, WHITE);
+            }
+            else
+            {
+                DrawTextureRec(katakanaSpriteSheet, actualKana.bounds, {40, 40}, WHITE);
+            }
         }
 
         if (isLearningMode && !isHighScoreScreen)
@@ -496,10 +501,10 @@ int main()
                 DrawText(TextFormat("Actual score: %i", score), 100, 360, 24, DARKGRAY);
             }
 
-            if (showKanaAnimation)
-            {
-                DrawTexture(actualAnimationKana.animationTexture, GetScreenWidth() / 2 - actualAnimationKana.animationTexture.width / 2, 40, WHITE);
-            }
+            // if (showKanaAnimation)
+            // {
+            //     DrawTexture(actualAnimationKana.animationTexture, GetScreenWidth() / 2 - actualAnimationKana.animationTexture.width / 2, 40, WHITE);
+            // }
 
             DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
 
@@ -532,7 +537,7 @@ int main()
                 {
                     DrawText("WRONG!", 145, 500, 20, RED);
 
-                    Kana previousKana = kanas[previousKanaIndex];
+                    TextureInfo previousKana = kanas[previousKanaIndex];
                     DrawText(previousKana.name.c_str(), 235, 495, 25, LIME);
                 }
 
@@ -598,21 +603,21 @@ int main()
     UnloadTexture(highScoresIconTexture);
     UnloadTexture(backIconTexture);
 
-    int index = 0;
-    for (auto &kana : kanas)
-    {
-        UnloadTexture(kana.texture);
-        UnloadTexture(kana.animationTexture);
-        UnloadImage(kana.image);
+    // int index = 0;
+    // for (auto &kana : kanas)
+    // {
+    //     UnloadTexture(kana.texture);
+    //     UnloadTexture(kana.animationTexture);
+    //     UnloadImage(kana.image);
 
-        // I just have sounds loaded for the hiraganas, and for the katakanas I just copied.
-        if (index < totalHiraganas)
-        {
-            UnloadSound(kana.sound);
-        }
+    //     // I just have sounds loaded for the hiraganas, and for the katakanas I just copied.
+    //     if (index < totalHiraganas)
+    //     {
+    //         UnloadSound(kana.sound);
+    //     }
 
-        index++;
-    }
+    //     index++;
+    // }
 
     CloseAudioDevice();
     CloseWindow();
