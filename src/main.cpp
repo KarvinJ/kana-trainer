@@ -113,14 +113,14 @@ int main()
     bool showMessage = false;
     bool isAnswerCorrect = false;
 
-    int nextFrameDataOffset = 0;   // Current byte offset to next frame in image.data
-    int currentAnimationFrame = 0; // Current animation frame to load and draw
-    int frameDelay = 8;            // Frame delay to switch between animation frames
-    int animationFrameCounter = 0; // General frames counter
+    // int nextFrameDataOffset = 0;   // Current byte offset to next frame in image.data
+    // int currentAnimationFrame = 0; // Current animation frame to load and draw
+    // int frameDelay = 8;            // Frame delay to switch between animation frames
+    // int animationFrameCounter = 0; // General frames counter
 
     while (!WindowShouldClose())
     {
-        int kanasInitialIndex = hiraganasInitialIndex;
+        // int kanasInitialIndex = hiraganasInitialIndex;
 
         if (isHiraganaMode)
         {
@@ -129,7 +129,7 @@ int main()
         else
         {
             totalKanas = kanas.size() - 1;
-            kanasInitialIndex = katakanasInitialIndex;
+            // kanasInitialIndex = katakanasInitialIndex;
         }
 
         TextureInfo actualKana = kanas[actualKanaIndex];
