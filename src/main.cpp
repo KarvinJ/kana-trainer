@@ -451,11 +451,11 @@ int main()
         {
             DrawRectangle(40, 40, 320, 268, WHITE);
 
-            if (isHiraganaMode)
+            if (isHiraganaMode && actualKana.isHiragana)
             {
                 DrawTextureRec(hiraganaSpriteSheet, actualKana.bounds, {40, 40}, WHITE);
             }
-            else
+            else if (!isHiraganaMode && !actualKana.isHiragana)
             {
                 DrawTextureRec(katakanaSpriteSheet, actualKana.bounds, {40, 40}, WHITE);
             }
