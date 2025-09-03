@@ -1,13 +1,14 @@
 #include "assetsManager.h"
 #include <fstream>
+#include <map>
+
+using std::map;
 
 vector<Kana> loadAssets()
 {
     vector<Kana> kanas;
     kanas.reserve(142);
 
-    string audioPath = "assets/sounds/";
-    string audioExtension = ".mp3";
     string hiraganaGifPath = "assets/gifs/hiraganas/";
     string gifExtension = ".gif";
 
@@ -26,15 +27,10 @@ vector<Kana> loadAssets()
         "ma", "mi", "mu", "me", "mo",
         "ya", "yu", "yo",
         "ra", "ri", "ru", "re", "ro",
-        "wa", "wo", "n"
-    };
+        "wa", "wo", "n"};
 
     for (string &kanaName : kanaNames)
     {
-        string actualAudioPath = audioPath + kanaName + audioExtension;
-        Sound actualSound = LoadSound(actualAudioPath.c_str());
-        SetSoundVolume(actualSound, 0.8);
-
         string actualGifPath = hiraganaGifPath + kanaName + gifExtension;
 
         int animationFrames = 0;
@@ -50,7 +46,7 @@ vector<Kana> loadAssets()
         // use spritesheets instead, like illustrated in textures_sprite_anim example
         Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
 
-        kanas.push_back({kanaName, actualSound, drawKanaTexture, kanaAnimation, animationFrames});
+        kanas.push_back({kanaName, drawKanaTexture, kanaAnimation, animationFrames});
     }
 
     string katakanaGifPath = "assets/gifs/katakanas/";
@@ -68,7 +64,7 @@ vector<Kana> loadAssets()
 
         Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
 
-        kanas.push_back({actualKana.name, actualKana.sound, drawKanaTexture, kanaAnimation, animationFrames});
+        kanas.push_back({actualKana.name, drawKanaTexture, kanaAnimation, animationFrames});
     }
 
     return kanas;
@@ -102,6 +98,11 @@ vector<TextureInfo> loadKanas()
 
     std::ifstream hiraganaTextureInfoFile("assets/img/hiraganas/hiraganas.txt");
 
+    string audioPath = "assets/sounds/";
+    string audioExtension = ".mp3";
+
+    map<string, Sound> sounds;
+
     for (string line; getline(hiraganaTextureInfoFile, line);)
     {
         auto list = customSplit(line, ',');
@@ -114,7 +115,13 @@ vector<TextureInfo> loadKanas()
 
         Rectangle bounds = {(float)x, (float)y, (float)width, (float)height};
 
-        textureInfo.push_back({name, bounds, true});
+        string actualAudioPath = audioPath + name + audioExtension;
+        Sound actualSound = LoadSound(actualAudioPath.c_str());
+        SetSoundVolume(actualSound, 0.8);
+
+        sounds[name] = actualSound;
+
+        textureInfo.push_back({name, bounds, true, actualSound});
     }
 
     hiraganaTextureInfoFile.close();
@@ -133,7 +140,7 @@ vector<TextureInfo> loadKanas()
 
         Rectangle bounds = {(float)x, (float)y, (float)width, (float)height};
 
-        textureInfo.push_back({name, bounds, false});
+        textureInfo.push_back({name, bounds, false, sounds[name]});
     }
 
     katakanaTextureInfoFile.close();

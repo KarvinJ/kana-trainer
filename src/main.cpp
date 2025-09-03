@@ -266,7 +266,7 @@ int main()
 
                 if (!isMute)
                 {
-                    // PlaySound(actualKana.sound);
+                    PlaySound(actualKana.sound);
                 }
 
                 showMessage = true;
@@ -339,7 +339,7 @@ int main()
 
                 if (soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
                 {
-                    // PlaySound(actualKana.sound);
+                    PlaySound(actualKana.sound);
                     soundTimer = 0;
                 }
             }
@@ -364,8 +364,8 @@ int main()
 
                 if (!isMute)
                 {
-                    // TextureInfo nextKana = kanas[actualKanaIndex];
-                    // PlaySound(nextKana.sound);
+                    TextureInfo nextKana = kanas[actualKanaIndex];
+                    PlaySound(nextKana.sound);
                 }
             }
 
@@ -394,8 +394,8 @@ int main()
 
                 if (!isMute)
                 {
-                    // TextureInfo nextKana = kanas[actualKanaIndex];
-                    // PlaySound(nextKana.sound);
+                    TextureInfo nextKana = kanas[actualKanaIndex];
+                    PlaySound(nextKana.sound);
                 }
             }
 
@@ -414,8 +414,8 @@ int main()
 
                 if (!isMute)
                 {
-                    // TextureInfo nextKana = kanas[actualKanaIndex];
-                    // PlaySound(nextKana.sound);
+                    TextureInfo nextKana = kanas[actualKanaIndex];
+                    PlaySound(nextKana.sound);
                 }
             }
         }

@@ -10,7 +10,6 @@ using std::string;
 typedef struct
 {
     std::string name;
-    Sound sound;
     Texture2D animationTexture;
     Image image;
     int animationFrames;
@@ -21,6 +20,7 @@ typedef struct
     string name;
     Rectangle bounds;
     bool isHiragana;
+    Sound sound;
 } TextureInfo;
 
 std::vector<Kana> loadAssets();
