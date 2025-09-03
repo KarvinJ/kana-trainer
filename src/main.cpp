@@ -1,6 +1,5 @@
 #include "assetsManager.h"
 #include "fileManager.h"
-#include <iostream>
 
 #define MAX_INPUT_CHARS 4
 // #define MAX_INPUT_CHARS 5 for the web build
@@ -220,6 +219,8 @@ int main()
             }
         }
 
+        Rectangle kanaCollisionBounds = {40, 40, 320, 268};
+
         Vector2 mousePosition = GetMousePosition();
 
         mouseBounds.x = mousePosition.x;
@@ -373,7 +374,7 @@ int main()
                 isHighScoreScreen = true;
             }
 
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, actualKana.bounds))
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, kanaCollisionBounds))
             {
                 showKanaAnimation = !showKanaAnimation;
             }
@@ -447,15 +448,16 @@ int main()
 
         ClearBackground(Color{29, 29, 27, 255});
 
+        // The error is something related to this conditionals, cuz there isn't a draw rectangle.
         if (!showKanaAnimation && !isHighScoreScreen)
         {
-            DrawRectangle(40, 40, 320, 268, WHITE);
+            DrawRectangleRec(kanaCollisionBounds, WHITE);
 
-            if (isHiraganaMode && actualKana.isHiragana)
+            if (isHiraganaMode)
             {
                 DrawTextureRec(hiraganaSpriteSheet, actualKana.bounds, {40, 40}, WHITE);
             }
-            else if (!isHiraganaMode && !actualKana.isHiragana)
+            else
             {
                 DrawTextureRec(katakanaSpriteSheet, actualKana.bounds, {40, 40}, WHITE);
             }
