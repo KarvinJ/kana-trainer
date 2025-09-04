@@ -1,10 +1,10 @@
 #include "assetsManager.h"
 #include <fstream>
-#include <map>
+#include <unordered_map>
 
-using std::map;
+using std::unordered_map;
 
-vector<KanaAnimation> loadAssets()
+vector<KanaAnimation> loadKanaAnimations()
 {
     vector<KanaAnimation> kanas;
     kanas.reserve(142);
@@ -91,17 +91,17 @@ vector<string> customSplit(string &str, char separator)
     return strings;
 }
 
-vector<Kana> loadKanas()
+void loadKanas(vector<Kana> &kanas)
 {
-    vector<Kana> textureInfo;
-    textureInfo.reserve(142);
-
     std::ifstream hiraganaTextureInfoFile("assets/img/hiraganas/hiraganas.txt");
 
     string audioPath = "assets/sounds/";
     string audioExtension = ".mp3";
 
-    map<string, Sound> sounds;
+// std::map uses a red-black tree internally → extra heap allocations per insert.
+// You don’t need ordering, just lookups by key → better to use unordered_map.
+    unordered_map<string, Sound> sounds;
+    sounds.reserve(71);
 
     for (string line; getline(hiraganaTextureInfoFile, line);)
     {
@@ -121,7 +121,7 @@ vector<Kana> loadKanas()
 
         sounds[name] = actualSound;
 
-        textureInfo.push_back({name, bounds, actualSound});
+        kanas.push_back({name, bounds, actualSound});
     }
 
     hiraganaTextureInfoFile.close();
@@ -140,12 +140,10 @@ vector<Kana> loadKanas()
 
         Rectangle bounds = {(float)x, (float)y, (float)width, (float)height};
 
-        textureInfo.push_back({name, bounds, sounds[name]});
+        kanas.push_back({name, bounds, sounds[name]});
     }
 
     katakanaTextureInfoFile.close();
-
-    return textureInfo;
 }
 
 string handleMissingGifName(string kanaName)

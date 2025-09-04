@@ -22,10 +22,10 @@ typedef struct
     Sound sound;
 } Kana;
 
-std::vector<KanaAnimation> loadAssets();
+std::vector<KanaAnimation> loadKanaAnimations();
 
 vector<string> customSplit(string &str, char separator);
 
-vector<Kana> loadKanas();
+void loadKanas(vector<Kana> &kanas);
 
 std::string handleMissingGifName(std::string kanaName);

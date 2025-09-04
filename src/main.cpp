@@ -103,8 +103,11 @@ int main()
     Texture2D hiraganaSpriteSheet = LoadTexture("assets/img/hiraganas/hiraganas.png");
     Texture2D katakanaSpriteSheet = LoadTexture("assets/img/katakanas/katakanas.png");
 
-    // vector<Kana> extraKanas = loadAssets();
-    kanas = loadKanas();
+    // vector<KanaAnimation> kanaAnimations = loadKanaAnimations();
+
+    vector<Kana> kanas;
+    kanas.reserve(142);
+    loadKanas(kanas);
 
     // there are 71 hiragana + 71 katakanas = 142.
     int totalKanas = kanas.size() - 1;
