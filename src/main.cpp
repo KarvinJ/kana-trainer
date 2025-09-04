@@ -465,21 +465,17 @@ int main()
     UnloadTexture(highScoresIconTexture);
     UnloadTexture(backIconTexture);
 
-    // int index = 0;
-    // for (auto &kana : kanas)
-    // {
-    //     UnloadTexture(kana.texture);
-    //     UnloadTexture(kana.animationTexture);
-    //     UnloadImage(kana.image);
+    int index = 0;
+    for (auto &kana : kanas)
+    {
+        // I just have sounds loaded for the hiraganas, and for the katakanas I just copied.
+        if (index < totalHiraganas)
+        {
+            UnloadSound(kana.sound);
+        }
 
-    //     // I just have sounds loaded for the hiraganas, and for the katakanas I just copied.
-    //     if (index < totalHiraganas)
-    //     {
-    //         UnloadSound(kana.sound);
-    //     }
-
-    //     index++;
-    // }
+        index++;
+    }
 
     CloseAudioDevice();
     CloseWindow();
