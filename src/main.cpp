@@ -29,7 +29,7 @@ bool isLearningMode = true;
 
 int attempts = 0;
 
-vector<TextureInfo> kanas;
+vector<Kana> kanas;
 
 string playerName;
 
@@ -144,7 +144,7 @@ int main()
             // kanasInitialIndex = katakanasInitialIndex;
         }
 
-        TextureInfo actualKana = kanas[actualKanaIndex];
+        Kana actualKana = kanas[actualKanaIndex];
 
         // Kana actualAnimationKana;
 
@@ -353,7 +353,7 @@ int main()
 
                 if (!isMute)
                 {
-                    TextureInfo nextKana = kanas[actualKanaIndex];
+                    Kana nextKana = kanas[actualKanaIndex];
                     PlaySound(nextKana.sound);
                 }
             }
@@ -383,7 +383,7 @@ int main()
 
                 if (!isMute)
                 {
-                    TextureInfo nextKana = kanas[actualKanaIndex];
+                    Kana nextKana = kanas[actualKanaIndex];
                     PlaySound(nextKana.sound);
                 }
             }
@@ -403,7 +403,7 @@ int main()
 
                 if (!isMute)
                 {
-                    TextureInfo nextKana = kanas[actualKanaIndex];
+                    Kana nextKana = kanas[actualKanaIndex];
                     PlaySound(nextKana.sound);
                 }
             }
@@ -619,7 +619,7 @@ void drawChallengeScreen(float deltaTime)
         {
             DrawText("WRONG!", 145, 500, 20, RED);
 
-            TextureInfo previousKana = kanas[previousKanaIndex];
+            Kana previousKana = kanas[previousKanaIndex];
             DrawText(previousKana.name.c_str(), 235, 495, 25, LIME);
         }
 

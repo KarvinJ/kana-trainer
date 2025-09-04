@@ -13,20 +13,19 @@ typedef struct
     Texture2D animationTexture;
     Image image;
     int animationFrames;
-} Kana;
+} KanaAnimation;
 
 typedef struct
 {
     string name;
     Rectangle bounds;
-    bool isHiragana;
     Sound sound;
-} TextureInfo;
+} Kana;
 
-std::vector<Kana> loadAssets();
+std::vector<KanaAnimation> loadAssets();
 
 vector<string> customSplit(string &str, char separator);
 
-vector<TextureInfo> loadKanas();
+vector<Kana> loadKanas();
 
 std::string handleMissingGifName(std::string kanaName);

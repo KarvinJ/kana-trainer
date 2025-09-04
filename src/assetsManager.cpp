@@ -4,9 +4,9 @@
 
 using std::map;
 
-vector<Kana> loadAssets()
+vector<KanaAnimation> loadAssets()
 {
-    vector<Kana> kanas;
+    vector<KanaAnimation> kanas;
     kanas.reserve(142);
 
     string hiraganaGifPath = "assets/gifs/hiraganas/";
@@ -91,9 +91,9 @@ vector<string> customSplit(string &str, char separator)
     return strings;
 }
 
-vector<TextureInfo> loadKanas()
+vector<Kana> loadKanas()
 {
-    vector<TextureInfo> textureInfo;
+    vector<Kana> textureInfo;
     textureInfo.reserve(142);
 
     std::ifstream hiraganaTextureInfoFile("assets/img/hiraganas/hiraganas.txt");
@@ -121,7 +121,7 @@ vector<TextureInfo> loadKanas()
 
         sounds[name] = actualSound;
 
-        textureInfo.push_back({name, bounds, true, actualSound});
+        textureInfo.push_back({name, bounds, actualSound});
     }
 
     hiraganaTextureInfoFile.close();
@@ -140,7 +140,7 @@ vector<TextureInfo> loadKanas()
 
         Rectangle bounds = {(float)x, (float)y, (float)width, (float)height};
 
-        textureInfo.push_back({name, bounds, false, sounds[name]});
+        textureInfo.push_back({name, bounds, sounds[name]});
     }
 
     katakanaTextureInfoFile.close();
