@@ -1,5 +1,15 @@
-#include "fileManager.h"
+#include "dataManager.h"
 #include <fstream>
+
+void updateHighScore(int &score, int &highScore)
+{
+    if (score > highScore)
+    {
+        highScore = score;
+        saveScore(score);
+        score = 0;
+    }
+}
 
 vector<string> saveInitialHighScores()
 {

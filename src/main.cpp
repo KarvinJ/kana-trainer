@@ -1,5 +1,5 @@
 #include "assetsManager.h"
-#include "fileManager.h"
+#include "dataManager.h"
 
 #define MAX_INPUT_CHARS 4
 // #define MAX_INPUT_CHARS 5 for the web build
@@ -8,28 +8,13 @@ const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 544;
 const int MAX_GAME_TIME = 60;
 
-void updateHighScore(int &score, int &highScore)
-{
-    if (score > highScore)
-    {
-        highScore = score;
-        saveScore(score);
-        score = 0;
-    }
-}
+string playerName;
+Texture2D backIconTexture;
+Rectangle backIconBounds;
 
-void toLowerCase(string &string)
-{
-    // Manual converting each character to lowercase using ASCII values
-    for (char &character : string)
-    {
-        if (character >= 'A' && character <= 'Z')
-        {
-            // Convert uppercase to lowercase by adding 32
-            character += 32;
-        }
-    }
-}
+void toLowerCase(string &string);
+
+void drawHighScoreScreen(vector<HighScore> &fullScores);
 
 int main()
 {
@@ -47,8 +32,8 @@ int main()
     Texture2D highScoresIconTexture = LoadTexture("assets/icons/high-scores-icon.png");
     Rectangle highScoreIconBounds = {SCREEN_WIDTH - 32, SCREEN_HEIGHT - 32, (float)highScoresIconTexture.width, (float)highScoresIconTexture.height};
 
-    Texture2D backIconTexture = LoadTexture("assets/icons/back-icon.png");
-    Rectangle backIconBounds = {8, SCREEN_HEIGHT - 32, (float)highScoresIconTexture.width, (float)highScoresIconTexture.height};
+    backIconTexture = LoadTexture("assets/icons/back-icon.png");
+    backIconBounds = {8, SCREEN_HEIGHT - 32, (float)highScoresIconTexture.width, (float)highScoresIconTexture.height};
 
     bool isMute = false;
     bool showKanaAnimation = false;
@@ -58,7 +43,7 @@ int main()
 
     int highScore = loadHighScore();
 
-    string playerName = loadPlayerName();
+    playerName = loadPlayerName();
 
     bool isHighScoreScreen = false;
 
@@ -555,30 +540,7 @@ int main()
 
         if (isHighScoreScreen)
         {
-            DrawText("Top Players", 120, 10, 24, LIGHTGRAY);
-
-            DrawText("Rank", 20, 40, 24, LIGHTGRAY);
-            DrawText("Name", 170, 40, 24, LIGHTGRAY);
-            DrawText("Score", 310, 40, 24, LIGHTGRAY);
-
-            int yPosition = 70;
-            for (auto &fullScore : fullScores)
-            {
-                DrawText(TextFormat("%i", fullScore.rank), 20, 0 + yPosition, 20, LIGHTGRAY);
-                DrawText(fullScore.name.c_str(), 170, 0 + yPosition, 20, LIGHTGRAY);
-                DrawText(TextFormat("%i", fullScore.score), 310, 0 + yPosition, 20, LIGHTGRAY);
-                yPosition += 25;
-            }
-
-            DrawText("WRITE YOUR NAME", 90, 400, 20, LIGHTGRAY);
-
-            if (!playerName.empty())
-            {
-                DrawText(("Current Player: " + playerName).c_str(), 90, 500, 20, LIGHTGRAY);
-            }
-
-            DrawRectangleRounded(backIconBounds, 0.3, 6, LIGHTGRAY);
-            DrawTexture(backIconTexture, backIconBounds.x, backIconBounds.y, WHITE);
+            drawHighScoreScreen(fullScores);
         }
 
         DrawRectangleRec(textBoxBounds, LIGHTGRAY);
@@ -623,4 +585,45 @@ int main()
 
     CloseAudioDevice();
     CloseWindow();
+}
+
+void drawHighScoreScreen(vector<HighScore> &fullScores)
+{
+    DrawText("Top Players", 120, 10, 24, LIGHTGRAY);
+
+    DrawText("Rank", 20, 40, 24, LIGHTGRAY);
+    DrawText("Name", 170, 40, 24, LIGHTGRAY);
+    DrawText("Score", 310, 40, 24, LIGHTGRAY);
+
+    int yPosition = 70;
+    for (auto &fullScore : fullScores)
+    {
+        DrawText(TextFormat("%i", fullScore.rank), 20, 0 + yPosition, 20, LIGHTGRAY);
+        DrawText(fullScore.name.c_str(), 170, 0 + yPosition, 20, LIGHTGRAY);
+        DrawText(TextFormat("%i", fullScore.score), 310, 0 + yPosition, 20, LIGHTGRAY);
+        yPosition += 25;
+    }
+
+    DrawText("WRITE YOUR NAME", 90, 400, 20, LIGHTGRAY);
+
+    if (!playerName.empty())
+    {
+        DrawText(("Current Player: " + playerName).c_str(), 90, 500, 20, LIGHTGRAY);
+    }
+
+    DrawRectangleRounded(backIconBounds, 0.3, 6, LIGHTGRAY);
+    DrawTexture(backIconTexture, backIconBounds.x, backIconBounds.y, WHITE);
+}
+
+void toLowerCase(string &string)
+{
+    // Manual converting each character to lowercase using ASCII values
+    for (char &character : string)
+    {
+        if (character >= 'A' && character <= 'Z')
+        {
+            // Convert uppercase to lowercase by adding 32
+            character += 32;
+        }
+    }
 }

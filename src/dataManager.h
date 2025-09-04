@@ -15,6 +15,8 @@ typedef struct
     int score;
 } HighScore;
 
+void updateHighScore(int &score, int &highScore);
+
 vector<string> saveInitialHighScores();
 
 string extractLastNChars(string const &str, size_t n);

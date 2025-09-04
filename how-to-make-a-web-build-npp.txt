@@ -31,7 +31,7 @@ echo
 echo > Compile program
 echo -----------------------
 cmd /c $(CC) --version
-cmd /c $(CC) -o index.html main.cpp assetsManager.cpp fileManager.cpp $(CFLAGS) $(LDFLAGS) $(LDLIBS) $(RESOURCES)
+cmd /c $(CC) -o index.html main.cpp assetsManager.cpp dataManager.cpp $(CFLAGS) $(LDFLAGS) $(LDLIBS) $(RESOURCES)
 echo
 echo > Reset Environment
 echo --------------------------
