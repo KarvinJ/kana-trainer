@@ -8,44 +8,77 @@ const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 544;
 const int MAX_GAME_TIME = 60;
 
+float gameTimer = MAX_GAME_TIME;
+
+bool isMute = false;
+
+int score = 0;
+
+int highScore = 0;
+
+int actualKanaIndex = 0;
+int previousKanaIndex = 0;
+
+bool isAnswerCorrect = false;
+bool isHiraganaMode = true;
+bool isHighScoreScreen = false;
+
+float showMessageTimer = 0;
+bool showMessage = false;
+
+vector<TextureInfo> kanas;
+
 string playerName;
+
+// ui elements
 Texture2D backIconTexture;
 Rectangle backIconBounds;
+
+Texture2D soundIconTexture;
+Rectangle soundIconBounds;
+
+Texture2D muteIconTexture;
+
+Texture2D checkIconTexture;
+Rectangle checkIconBounds;
+
+Texture2D highScoresIconTexture;
+Rectangle highScoreIconBounds;
 
 void toLowerCase(string &string);
 
 void drawHighScoreScreen(vector<HighScore> &fullScores);
+
+void drawChallengeScreen(float deltaTime);
+
+void drawTextBox(char answer[4], int &textBoxFrameCounter, int letterCount);
+
+void drawLearningScreen(float &showScoreTimer, float deltaTime);
+
+void handleHighScoreScreenUI(const Rectangle &mouseBounds, char answer[4], int &letterCount);
 
 int main()
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "KANA-TRAINER");
     SetTargetFPS(60);
 
-    Texture2D soundIconTexture = LoadTexture("assets/icons/sound-icon.png");
-    Rectangle soundIconBounds = {SCREEN_WIDTH - 32, 10, (float)soundIconTexture.width, (float)soundIconTexture.height};
+    soundIconTexture = LoadTexture("assets/icons/sound-icon.png");
+    soundIconBounds = {SCREEN_WIDTH - 32, 10, (float)soundIconTexture.width, (float)soundIconTexture.height};
 
-    Texture2D muteIconTexture = LoadTexture("assets/icons/mute-icon.png");
+    muteIconTexture = LoadTexture("assets/icons/mute-icon.png");
 
-    Texture2D checkIconTexture = LoadTexture("assets/icons/check-icon.png");
-    Rectangle checkIconBounds = {8, 10, (float)checkIconTexture.width, (float)checkIconTexture.height};
+    checkIconTexture = LoadTexture("assets/icons/check-icon.png");
+    checkIconBounds = {8, 10, (float)checkIconTexture.width, (float)checkIconTexture.height};
 
-    Texture2D highScoresIconTexture = LoadTexture("assets/icons/high-scores-icon.png");
-    Rectangle highScoreIconBounds = {SCREEN_WIDTH - 32, SCREEN_HEIGHT - 32, (float)highScoresIconTexture.width, (float)highScoresIconTexture.height};
+    highScoresIconTexture = LoadTexture("assets/icons/high-scores-icon.png");
+    highScoreIconBounds = {SCREEN_WIDTH - 32, SCREEN_HEIGHT - 32, (float)highScoresIconTexture.width, (float)highScoresIconTexture.height};
 
     backIconTexture = LoadTexture("assets/icons/back-icon.png");
     backIconBounds = {8, SCREEN_HEIGHT - 32, (float)highScoresIconTexture.width, (float)highScoresIconTexture.height};
 
-    bool isMute = false;
-    bool showKanaAnimation = false;
-
-    int score = 0;
-    float gameTimer = MAX_GAME_TIME;
-
-    int highScore = loadHighScore();
+    highScore = loadHighScore();
 
     playerName = loadPlayerName();
-
-    bool isHighScoreScreen = false;
 
     if (playerName.compare("aaa") == 0)
     {
@@ -68,7 +101,7 @@ int main()
     Texture2D katakanaSpriteSheet = LoadTexture("assets/img/katakanas/katakanas.png");
 
     // vector<Kana> extraKanas = loadAssets();
-    vector<TextureInfo> kanas = loadKanas();
+    kanas = loadKanas();
 
     // there are 71 hiragana + 71 katakanas = 142.
     int totalKanas = kanas.size() - 1;
@@ -79,23 +112,17 @@ int main()
     int katakanasInitialIndex = totalHiraganas + 1;
 
     bool isLearningMode = true;
-    bool isHiraganaMode = true;
 
-    int previousKanaIndex = 0;
-    int actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
+    actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
 
     Rectangle mouseBounds = {0, 0, 8, 8};
 
     char answer[MAX_INPUT_CHARS] = "\0"; // NOTE: One extra space required for null terminator char '\0'
     int letterCount = 0;
 
-    Rectangle textBoxBounds = {90, 425, 225, 50};
-
     int textBoxFrameCounter = 0;
 
-    float showMessageTimer = 0;
-    bool showMessage = false;
-    bool isAnswerCorrect = false;
+    bool showKanaAnimation = false;
 
     // int nextFrameDataOffset = 0;   // Current byte offset to next frame in image.data
     // int currentAnimationFrame = 0; // Current animation frame to load and draw
@@ -407,26 +434,7 @@ int main()
 
         if (isHighScoreScreen)
         {
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, backIconBounds))
-            {
-                isHighScoreScreen = false;
-            }
-
-            if (IsKeyPressed(KEY_SPACE))
-            {
-                string name = answer;
-                name.pop_back();
-                toLowerCase(name);
-
-                if (!name.empty())
-                {
-                    playerName = name;
-                    savePlayerName(name);
-                }
-
-                answer[0] = '\0';
-                letterCount = 0;
-            }
+            handleHighScoreScreenUI(mouseBounds, answer, letterCount);
         }
 
         BeginDrawing();
@@ -450,92 +458,12 @@ int main()
 
         if (isLearningMode && !isHighScoreScreen)
         {
-            if (isHiraganaMode)
-            {
-                DrawText("Hiragana mode", 110, 10, 24, LIGHTGRAY);
-            }
-            else
-            {
-                DrawText("katakana mode", 110, 10, 24, LIGHTGRAY);
-            }
-
-            DrawRectangleRounded(soundIconBounds, 0.3, 6, LIGHTGRAY);
-
-            if (!isMute)
-            {
-                DrawTexture(soundIconTexture, soundIconBounds.x, soundIconBounds.y, WHITE);
-            }
-            else
-            {
-                DrawTexture(muteIconTexture, soundIconBounds.x, soundIconBounds.y, WHITE);
-            }
-
-            DrawRectangleRounded(checkIconBounds, 0.3, 6, LIGHTGRAY);
-
-            if (isHiraganaMode)
-            {
-                DrawTexture(checkIconTexture, checkIconBounds.x, checkIconBounds.y, WHITE);
-            }
-
-            if (showScoreTimer < 5 && highScore > 0)
-            {
-                DrawText(TextFormat("High score: %i", highScore), 110, 320, 24, LIGHTGRAY);
-                showScoreTimer += deltaTime;
-            }
-
-            if (showScoreTimer < 5 && score > 0)
-            {
-                DrawText(TextFormat("Actual score: %i", score), 100, 360, 24, DARKGRAY);
-            }
-
-            // if (showKanaAnimation)
-            // {
-            //     DrawTexture(actualAnimationKana.animationTexture, GetScreenWidth() / 2 - actualAnimationKana.animationTexture.width / 2, 40, WHITE);
-            // }
-
-            DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
-
-            DrawRectangleRounded(highScoreIconBounds, 0.3, 6, LIGHTGRAY);
-            DrawTexture(highScoresIconTexture, highScoreIconBounds.x, highScoreIconBounds.y, WHITE);
+            drawLearningScreen(showScoreTimer, deltaTime);
         }
 
         else if (!isLearningMode && !isHighScoreScreen)
         {
-            if (gameTimer > 0)
-            {
-                gameTimer -= deltaTime;
-            }
-
-            DrawText(TextFormat("%i", (int)gameTimer), SCREEN_WIDTH - 40, 10, 24, WHITE);
-            DrawText(TextFormat("%i", score), 200, 10, 24, WHITE);
-            DrawText(TextFormat("%i", highScore), 20, 10, 24, WHITE);
-            DrawRectangle(160, SCREEN_HEIGHT / 2 - 10, 80, 45, WHITE);
-
-            // drawing text box
-            DrawText("WRITE THE ANSWER", 90, 400, 20, LIGHTGRAY);
-
-            if (showMessage)
-            {
-                if (isAnswerCorrect)
-                {
-                    DrawText("CORRECT!", 145, 500, 20, LIME);
-                }
-                else
-                {
-                    DrawText("WRONG!", 145, 500, 20, RED);
-
-                    TextureInfo previousKana = kanas[previousKanaIndex];
-                    DrawText(previousKana.name.c_str(), 235, 495, 25, LIME);
-                }
-
-                showMessageTimer += deltaTime;
-
-                if (showMessageTimer > 1.5)
-                {
-                    showMessageTimer = 0;
-                    showMessage = false;
-                }
-            }
+            drawChallengeScreen(deltaTime);
         }
 
         if (isHighScoreScreen)
@@ -543,24 +471,14 @@ int main()
             drawHighScoreScreen(fullScores);
         }
 
-        DrawRectangleRec(textBoxBounds, LIGHTGRAY);
-        DrawRectangleLines((int)textBoxBounds.x, (int)textBoxBounds.y, (int)textBoxBounds.width, (int)textBoxBounds.height, DARKGRAY);
-        DrawText(answer, (int)textBoxBounds.x + 5, (int)textBoxBounds.y + 8, 40, DARKGRAY);
-
-        textBoxFrameCounter++;
-
-        if (letterCount < MAX_INPUT_CHARS)
-        {
-            // Draw blinking underscore char
-            if (((textBoxFrameCounter / 20) % 2) == 0)
-            {
-                DrawText("_", (int)textBoxBounds.x + 8 + MeasureText(answer, 40), (int)textBoxBounds.y + 12, 40, DARKGRAY);
-            }
-        }
+        drawTextBox(answer, textBoxFrameCounter, letterCount);
 
         EndDrawing();
     }
 
+    UnloadTexture(hiraganaSpriteSheet);
+    UnloadTexture(katakanaSpriteSheet);
+    UnloadTexture(muteIconTexture);
     UnloadTexture(muteIconTexture);
     UnloadTexture(soundIconTexture);
     UnloadTexture(checkIconTexture);
@@ -585,6 +503,140 @@ int main()
 
     CloseAudioDevice();
     CloseWindow();
+}
+
+void handleHighScoreScreenUI(const Rectangle &mouseBounds, char answer[4], int &letterCount)
+{
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, backIconBounds))
+    {
+        isHighScoreScreen = false;
+    }
+
+    if (IsKeyPressed(KEY_SPACE))
+    {
+        string name = answer;
+        name.pop_back();
+        toLowerCase(name);
+
+        if (!name.empty())
+        {
+            playerName = name;
+            savePlayerName(name);
+        }
+
+        answer[0] = '\0';
+        letterCount = 0;
+    }
+}
+
+void drawLearningScreen(float &showScoreTimer, float deltaTime)
+{
+    if (isHiraganaMode)
+    {
+        DrawText("Hiragana mode", 110, 10, 24, LIGHTGRAY);
+    }
+    else
+    {
+        DrawText("katakana mode", 110, 10, 24, LIGHTGRAY);
+    }
+
+    DrawRectangleRounded(soundIconBounds, 0.3, 6, LIGHTGRAY);
+
+    if (!isMute)
+    {
+        DrawTexture(soundIconTexture, soundIconBounds.x, soundIconBounds.y, WHITE);
+    }
+    else
+    {
+        DrawTexture(muteIconTexture, soundIconBounds.x, soundIconBounds.y, WHITE);
+    }
+
+    DrawRectangleRounded(checkIconBounds, 0.3, 6, LIGHTGRAY);
+
+    if (isHiraganaMode)
+    {
+        DrawTexture(checkIconTexture, checkIconBounds.x, checkIconBounds.y, WHITE);
+    }
+
+    if (showScoreTimer < 5 && highScore > 0)
+    {
+        DrawText(TextFormat("High score: %i", highScore), 110, 320, 24, LIGHTGRAY);
+        showScoreTimer += deltaTime;
+    }
+
+    if (showScoreTimer < 5 && score > 0)
+    {
+        DrawText(TextFormat("Actual score: %i", score), 100, 360, 24, DARKGRAY);
+    }
+
+    // if (showKanaAnimation)
+    // {
+    //     DrawTexture(actualAnimationKana.animationTexture, GetScreenWidth() / 2 - actualAnimationKana.animationTexture.width / 2, 40, WHITE);
+    // }
+
+    DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
+
+    DrawRectangleRounded(highScoreIconBounds, 0.3, 6, LIGHTGRAY);
+    DrawTexture(highScoresIconTexture, highScoreIconBounds.x, highScoreIconBounds.y, WHITE);
+}
+
+void drawTextBox(char answer[4], int &textBoxFrameCounter, int letterCount)
+{
+    Rectangle textBoxBounds = {90, 425, 225, 50};
+
+    DrawRectangleRec(textBoxBounds, LIGHTGRAY);
+    DrawRectangleLines((int)textBoxBounds.x, (int)textBoxBounds.y, (int)textBoxBounds.width, (int)textBoxBounds.height, DARKGRAY);
+    DrawText(answer, (int)textBoxBounds.x + 5, (int)textBoxBounds.y + 8, 40, DARKGRAY);
+
+    textBoxFrameCounter++;
+
+    if (letterCount < MAX_INPUT_CHARS)
+    {
+        // Draw blinking underscore char
+        if (((textBoxFrameCounter / 20) % 2) == 0)
+        {
+            DrawText("_", (int)textBoxBounds.x + 8 + MeasureText(answer, 40), (int)textBoxBounds.y + 12, 40, DARKGRAY);
+        }
+    }
+}
+
+void drawChallengeScreen(float deltaTime)
+{
+    if (gameTimer > 0)
+    {
+        gameTimer -= deltaTime;
+    }
+
+    DrawText(TextFormat("%i", (int)gameTimer), SCREEN_WIDTH - 40, 10, 24, WHITE);
+    DrawText(TextFormat("%i", score), 200, 10, 24, WHITE);
+    DrawText(TextFormat("%i", highScore), 20, 10, 24, WHITE);
+    DrawRectangle(160, SCREEN_HEIGHT / 2 - 10, 80, 45, WHITE);
+
+    // drawing text box
+    DrawText("WRITE THE ANSWER", 90, 400, 20, LIGHTGRAY);
+
+    if (showMessage)
+    {
+        if (isAnswerCorrect)
+        {
+            DrawText("CORRECT!", 145, 500, 20, LIME);
+        }
+        else
+        {
+            DrawText("WRONG!", 145, 500, 20, RED);
+
+            TextureInfo previousKana = kanas[previousKanaIndex];
+            DrawText(previousKana.name.c_str(), 235, 495, 25, LIME);
+        }
+
+        showMessageTimer += deltaTime;
+
+        if (showMessageTimer > 1.5)
+        {
+            showMessageTimer = 0;
+            showMessage = false;
+        }
+    }
 }
 
 void drawHighScoreScreen(vector<HighScore> &fullScores)
