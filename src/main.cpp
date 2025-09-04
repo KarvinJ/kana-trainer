@@ -25,6 +25,9 @@ bool isHighScoreScreen = false;
 
 float showMessageTimer = 0;
 bool showMessage = false;
+bool isLearningMode = true;
+
+int attempts = 0;
 
 vector<TextureInfo> kanas;
 
@@ -56,6 +59,8 @@ void drawTextBox(char answer[4], int &textBoxFrameCounter, int letterCount);
 void drawLearningScreen(float &showScoreTimer, float deltaTime);
 
 void handleHighScoreScreenUI(const Rectangle &mouseBounds, char answer[4], int &letterCount);
+
+void saveChallengeData(float &showScoreTimer, vector<string> &highScores, vector<HighScore> &fullScores);
 
 int main()
 {
@@ -89,8 +94,6 @@ int main()
 
     vector<HighScore> fullScores = getFullScoreData(highScores);
 
-    int attempts = 0;
-
     // need to explicitly define local variable values, if not I'll get a segmentation fault.
     float soundTimer = 0;
     float showScoreTimer = 5;
@@ -110,8 +113,6 @@ int main()
     int totalHiraganas = kanas.size() / 2 - 1;
 
     int katakanasInitialIndex = totalHiraganas + 1;
-
-    bool isLearningMode = true;
 
     actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
 
@@ -244,19 +245,7 @@ int main()
         {
             if (gameTimer < 1)
             {
-                isLearningMode = true;
-                attempts = 0;
-                showScoreTimer = 0;
-
-                score *= gameTimer;
-
-                if (score > 0)
-                {
-                    highScores = saveActualHighScores(highScores, score, playerName);
-                    fullScores = getFullScoreData(highScores);
-                    updateHighScore(score, highScore);
-                    gameTimer = MAX_GAME_TIME;
-                }
+                saveChallengeData(showScoreTimer, highScores, fullScores);
             }
 
             if (IsKeyPressed(KEY_SPACE))
@@ -300,19 +289,7 @@ int main()
 
                 if (attempts == 20)
                 {
-                    isLearningMode = true;
-                    attempts = 0;
-                    showScoreTimer = 0;
-
-                    score *= gameTimer;
-
-                    if (score > 0)
-                    {
-                        highScores = saveActualHighScores(highScores, score, playerName);
-                        fullScores = getFullScoreData(highScores);
-                        updateHighScore(score, highScore);
-                        gameTimer = MAX_GAME_TIME;
-                    }
+                    saveChallengeData(showScoreTimer, highScores, fullScores);
                 }
             }
         }
@@ -439,7 +416,7 @@ int main()
 
         BeginDrawing();
 
-        ClearBackground(Color{29, 29, 27, 255});
+        ClearBackground({29, 29, 27, 255});
 
         // The error is something related to this conditionals, cuz there isn't a draw rectangle.
         if (!showKanaAnimation && !isHighScoreScreen)
@@ -503,6 +480,23 @@ int main()
 
     CloseAudioDevice();
     CloseWindow();
+}
+
+void saveChallengeData(float &showScoreTimer, vector<string> &highScores, vector<HighScore> &fullScores)
+{
+    isLearningMode = true;
+    attempts = 0;
+    showScoreTimer = 0;
+
+    score *= gameTimer;
+
+    if (score > 0)
+    {
+        highScores = saveActualHighScores(highScores, score, playerName);
+        fullScores = getFullScoreData(highScores);
+        updateHighScore(score, highScore);
+        gameTimer = MAX_GAME_TIME;
+    }
 }
 
 void handleHighScoreScreenUI(const Rectangle &mouseBounds, char answer[4], int &letterCount)
