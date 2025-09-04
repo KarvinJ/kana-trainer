@@ -22,7 +22,7 @@ typedef struct
     Sound sound;
 } Kana;
 
-std::vector<KanaAnimation> loadKanaAnimations();
+void loadKanaAnimations(vector<KanaAnimation> &kanaAnimations);
 
 vector<string> customSplit(string &str, char separator);
 

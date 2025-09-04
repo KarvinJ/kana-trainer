@@ -4,11 +4,8 @@
 
 using std::unordered_map;
 
-vector<KanaAnimation> loadKanaAnimations()
+void loadKanaAnimations(vector<KanaAnimation> &kanaAnimations)
 {
-    vector<KanaAnimation> kanas;
-    kanas.reserve(142);
-
     string hiraganaGifPath = "assets/gifs/hiraganas/";
     string gifExtension = ".gif";
 
@@ -46,16 +43,16 @@ vector<KanaAnimation> loadKanaAnimations()
         // use spritesheets instead, like illustrated in textures_sprite_anim example
         Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
 
-        kanas.push_back({kanaName, drawKanaTexture, kanaAnimation, animationFrames});
+        kanaAnimations.push_back({kanaName, drawKanaTexture, kanaAnimation, animationFrames});
     }
 
     string katakanaGifPath = "assets/gifs/katakanas/";
 
-    int actualMaxSize = kanas.size();
+    int actualMaxSize = kanaAnimations.size();
 
     for (int i = 0; i < actualMaxSize; i++)
     {
-        auto actualKana = kanas[i];
+        auto actualKana = kanaAnimations[i];
 
         string actualGifPath = katakanaGifPath + actualKana.name + gifExtension;
 
@@ -64,10 +61,8 @@ vector<KanaAnimation> loadKanaAnimations()
 
         Texture2D drawKanaTexture = LoadTextureFromImage(kanaAnimation);
 
-        kanas.push_back({actualKana.name, drawKanaTexture, kanaAnimation, animationFrames});
+        kanaAnimations.push_back({actualKana.name, drawKanaTexture, kanaAnimation, animationFrames});
     }
-
-    return kanas;
 }
 
 vector<string> customSplit(string &str, char separator)

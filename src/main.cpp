@@ -103,7 +103,9 @@ int main()
     Texture2D hiraganaSpriteSheet = LoadTexture("assets/img/hiraganas/hiraganas.png");
     Texture2D katakanaSpriteSheet = LoadTexture("assets/img/katakanas/katakanas.png");
 
-    // vector<KanaAnimation> kanaAnimations = loadKanaAnimations();
+    // vector<KanaAnimation> kanaAnimations;
+    // kanaAnimations.reserve(142);
+    // loadKanaAnimations(kanaAnimations);
 
     vector<Kana> kanas;
     kanas.reserve(142);
