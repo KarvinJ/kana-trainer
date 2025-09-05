@@ -103,10 +103,6 @@ int main()
     Texture2D hiraganaSpriteSheet = LoadTexture("assets/img/hiraganas/hiraganas.png");
     Texture2D katakanaSpriteSheet = LoadTexture("assets/img/katakanas/katakanas.png");
 
-    // vector<KanaAnimation> kanaAnimations;
-    // kanaAnimations.reserve(142);
-    // loadKanaAnimations(kanaAnimations);
-
     vector<Kana> kanas;
     kanas.reserve(142);
     loadKanas(kanas);
@@ -128,17 +124,8 @@ int main()
 
     int textBoxFrameCounter = 0;
 
-    bool showKanaAnimation = false;
-
-    // int nextFrameDataOffset = 0;   // Current byte offset to next frame in image.data
-    // int currentAnimationFrame = 0; // Current animation frame to load and draw
-    // int frameDelay = 8;            // Frame delay to switch between animation frames
-    // int animationFrameCounter = 0; // General frames counter
-
     while (!WindowShouldClose())
     {
-        // int kanasInitialIndex = hiraganasInitialIndex;
-
         if (isHiraganaMode)
         {
             totalKanas = totalHiraganas;
@@ -146,42 +133,9 @@ int main()
         else
         {
             totalKanas = kanas.size() - 1;
-            // kanasInitialIndex = katakanasInitialIndex;
         }
 
         Kana actualKana = kanas[actualKanaIndex];
-
-        // Kana actualAnimationKana;
-
-        // for (int i = kanasInitialIndex; i < totalKanas + 1; i++)
-        // {
-        //     auto actualName = handleMissingGifName(actualKana.name);
-
-        //     if (kanas[i].name.compare(actualName) == 0)
-        //     {
-        //         actualAnimationKana = kanas[i];
-        //         break;
-        //     }
-        // }
-
-        // animationFrameCounter++;
-
-        // if (showKanaAnimation && animationFrameCounter >= frameDelay)
-        // {
-        //     // Move to next frame. NOTE: If final frame is reached we return to first frame
-        //     currentAnimationFrame++;
-        //     if (currentAnimationFrame >= actualAnimationKana.animationFrames)
-        //         currentAnimationFrame = 0;
-
-        //     // Get memory offset position for next frame data in image.data
-        //     nextFrameDataOffset = actualAnimationKana.image.width * actualAnimationKana.image.height * 4 * currentAnimationFrame;
-
-        //     // Update GPU texture data with next frame image data
-        //     // WARNING: Data size (frame size) and pixel format must match already created texture
-        //     UpdateTexture(actualAnimationKana.animationTexture, ((unsigned char *)actualAnimationKana.image.data) + nextFrameDataOffset);
-
-        //     animationFrameCounter = 0;
-        // }
 
         float deltaTime = GetFrameTime();
 
@@ -217,7 +171,6 @@ int main()
         if (!isHighScoreScreen && IsKeyPressed(KEY_ENTER))
         {
             isLearningMode = !isLearningMode;
-            showKanaAnimation = false;
             score = 0;
             attempts = 0;
             gameTimer = MAX_GAME_TIME;
@@ -368,11 +321,6 @@ int main()
                 isHighScoreScreen = true;
             }
 
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, kanaCollisionBounds))
-            {
-                showKanaAnimation = !showKanaAnimation;
-            }
-
             if (IsKeyPressed(KEY_RIGHT))
             {
                 actualKanaIndex++;
@@ -423,8 +371,7 @@ int main()
 
         ClearBackground({29, 29, 27, 255});
 
-        // The error is something related to this conditionals, cuz there isn't a draw rectangle.
-        if (!showKanaAnimation && !isHighScoreScreen)
+        if (!isHighScoreScreen)
         {
             DrawRectangleRec(kanaCollisionBounds, WHITE);
 
@@ -563,11 +510,6 @@ void drawLearningScreen(float &showScoreTimer, float deltaTime)
     {
         DrawText(TextFormat("Actual score: %i", score), 100, 360, 24, DARKGRAY);
     }
-
-    // if (showKanaAnimation)
-    // {
-    //     DrawTexture(actualAnimationKana.animationTexture, GetScreenWidth() / 2 - actualAnimationKana.animationTexture.width / 2, 40, WHITE);
-    // }
 
     DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
 
