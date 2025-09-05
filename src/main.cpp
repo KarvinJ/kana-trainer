@@ -62,6 +62,8 @@ void handleHighScoreScreenUI(const Rectangle &mouseBounds, char answer[4], int &
 
 void saveChallengeData(float &showScoreTimer, vector<string> &highScores, vector<HighScore> &fullScores);
 
+void handleTextBoxTyping(int &letterCount, char answer[4]);
+
 int main()
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "KANA-TRAINER");
@@ -139,34 +141,7 @@ int main()
 
         float deltaTime = GetFrameTime();
 
-        // Get char pressed (unicode character) on the queue
-        int character = GetCharPressed();
-
-        // Check if more characters have been pressed on the same frame
-        while (character > 0)
-        {
-            // NOTE: Only allow keys in range [32..125]
-            if ((character >= 32) && (character <= 125) && (letterCount < MAX_INPUT_CHARS))
-            {
-                answer[letterCount] = (char)character;
-                answer[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
-                letterCount++;
-            }
-
-            character = GetCharPressed(); // Check next character in the queue
-        }
-
-        if (IsKeyPressed(KEY_BACKSPACE))
-        {
-            letterCount--;
-
-            if (letterCount < 0)
-            {
-                letterCount = 0;
-            }
-
-            answer[letterCount] = '\0';
-        }
+        handleTextBoxTyping(letterCount, answer);
 
         if (!isHighScoreScreen && IsKeyPressed(KEY_ENTER))
         {
@@ -189,8 +164,6 @@ int main()
                 actualKanaIndex = GetRandomValue(katakanasInitialIndex, totalKanas);
             }
         }
-
-        Rectangle kanaCollisionBounds = {40, 40, 320, 268};
 
         Vector2 mousePosition = GetMousePosition();
 
@@ -284,11 +257,11 @@ int main()
             {
                 soundTimer += deltaTime;
 
-                if (soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
-                {
-                    PlaySound(actualKana.sound);
-                    soundTimer = 0;
-                }
+                // if (soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
+                // {
+                //     PlaySound(actualKana.sound);
+                //     soundTimer = 0;
+                // }
             }
 
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, soundIconBounds))
@@ -374,7 +347,7 @@ int main()
 
         else if (!isHighScoreScreen)
         {
-            DrawRectangleRec(kanaCollisionBounds, WHITE);
+            DrawRectangleRec({40, 40, 320, 268}, WHITE);
 
             if (isHiraganaMode)
             {
@@ -424,6 +397,38 @@ int main()
 
     CloseAudioDevice();
     CloseWindow();
+}
+
+void handleTextBoxTyping(int &letterCount, char answer[4])
+{
+    // Get char pressed (unicode character) on the queue
+    int character = GetCharPressed();
+
+    // Check if more characters have been pressed on the same frame
+    while (character > 0)
+    {
+        // NOTE: Only allow keys in range [32..125]
+        if ((character >= 32) && (character <= 125) && (letterCount < MAX_INPUT_CHARS))
+        {
+            answer[letterCount] = (char)character;
+            answer[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
+            letterCount++;
+        }
+
+        character = GetCharPressed(); // Check next character in the queue
+    }
+
+    if (IsKeyPressed(KEY_BACKSPACE))
+    {
+        letterCount--;
+
+        if (letterCount < 0)
+        {
+            letterCount = 0;
+        }
+
+        answer[letterCount] = '\0';
+    }
 }
 
 void saveChallengeData(float &showScoreTimer, vector<string> &highScores, vector<HighScore> &fullScores)
@@ -558,8 +563,8 @@ void drawChallengeScreen(float deltaTime)
         {
             DrawText("WRONG!", 145, 500, 20, RED);
 
-            Kana previousKana = kanas[previousKanaIndex];
-            DrawText(previousKana.name.c_str(), 235, 495, 25, LIME);
+            // Kana previousKana = kanas[previousKanaIndex];
+            // DrawText(previousKana.name.c_str(), 235, 495, 25, LIME);
         }
 
         showMessageTimer += deltaTime;
