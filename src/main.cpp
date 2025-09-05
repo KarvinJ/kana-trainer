@@ -362,16 +362,17 @@ int main()
             }
         }
 
-        if (isHighScoreScreen)
-        {
-            handleHighScoreScreenUI(mouseBounds, answer, letterCount);
-        }
-
         BeginDrawing();
 
         ClearBackground({29, 29, 27, 255});
 
-        if (!isHighScoreScreen)
+        if (isHighScoreScreen)
+        {
+            handleHighScoreScreenUI(mouseBounds, answer, letterCount);
+            drawHighScoreScreen(fullScores);
+        }
+
+        else if (!isHighScoreScreen)
         {
             DrawRectangleRec(kanaCollisionBounds, WHITE);
 
@@ -393,11 +394,6 @@ int main()
         else if (!isLearningMode && !isHighScoreScreen)
         {
             drawChallengeScreen(deltaTime);
-        }
-
-        if (isHighScoreScreen)
-        {
-            drawHighScoreScreen(fullScores);
         }
 
         drawTextBox(answer, textBoxFrameCounter, letterCount);
