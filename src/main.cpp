@@ -384,16 +384,16 @@ int main()
             {
                 DrawTextureRec(katakanaSpriteSheet, actualKana.bounds, {40, 40}, WHITE);
             }
-        }
 
-        if (isLearningMode && !isHighScoreScreen)
-        {
-            drawLearningScreen(showScoreTimer, deltaTime);
-        }
+            if (isLearningMode)
+            {
+                drawLearningScreen(showScoreTimer, deltaTime);
+            }
 
-        else if (!isLearningMode && !isHighScoreScreen)
-        {
-            drawChallengeScreen(deltaTime);
+            else 
+            {
+                drawChallengeScreen(deltaTime);
+            }
         }
 
         drawTextBox(answer, textBoxFrameCounter, letterCount);
