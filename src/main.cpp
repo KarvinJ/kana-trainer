@@ -110,7 +110,7 @@ int main()
     loadKanas(kanas);
 
     // there are 71 hiragana + 71 katakanas = 142.
-    int totalKanas = kanas.size() - 1;
+    int totalElements = kanas.size() - 1;
 
     int hiraganasInitialIndex = 0;
     int totalHiraganas = kanas.size() / 2 - 1;
@@ -128,42 +128,18 @@ int main()
 
     while (!WindowShouldClose())
     {
+        int totalKanas = totalElements;
+
         if (isHiraganaMode)
         {
             totalKanas = totalHiraganas;
         }
-        else
-        {
-            totalKanas = kanas.size() - 1;
-        }
-
+        
         Kana actualKana = kanas[actualKanaIndex];
 
         float deltaTime = GetFrameTime();
 
         handleTextBoxTyping(letterCount, answer);
-
-        if (!isHighScoreScreen && IsKeyPressed(KEY_ENTER))
-        {
-            isLearningMode = !isLearningMode;
-            score = 0;
-            attempts = 0;
-            gameTimer = MAX_GAME_TIME;
-            showMessageTimer = 0;
-            showMessage = false;
-
-            answer[0] = '\0';
-            letterCount = 0;
-
-            if (isHiraganaMode)
-            {
-                actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalKanas);
-            }
-            else
-            {
-                actualKanaIndex = GetRandomValue(katakanasInitialIndex, totalKanas);
-            }
-        }
 
         Vector2 mousePosition = GetMousePosition();
 
@@ -172,41 +148,20 @@ int main()
 
         string actualKanaName = answer;
 
-        if (!isLearningMode && !isHighScoreScreen)
+        if (!isHighScoreScreen)
         {
-            if (gameTimer < 1)
+            if (IsKeyPressed(KEY_ENTER))
             {
-                saveChallengeData(showScoreTimer, highScores, fullScores);
-            }
+                isLearningMode = !isLearningMode;
+                score = 0;
+                attempts = 0;
+                gameTimer = MAX_GAME_TIME;
+                showMessageTimer = 0;
+                showMessage = false;
 
-            if (IsKeyPressed(KEY_SPACE))
-            {
-                // removing the last character, that is always a blank space.
-                actualKanaName.pop_back();
-                // always converting to lower case, in case anyone writes in uppercase.
-                toLowerCase(actualKanaName);
-
-                if (actualKana.name.compare(actualKanaName) == 0)
-                {
-                    isAnswerCorrect = true;
-                    score++;
-                }
-                else
-                {
-                    isAnswerCorrect = false;
-                }
-
-                if (!isMute)
-                {
-                    PlaySound(actualKana.sound);
-                }
-
-                showMessage = true;
-
-                // clearing the textbox array.
                 answer[0] = '\0';
                 letterCount = 0;
-                previousKanaIndex = actualKanaIndex;
+
                 if (isHiraganaMode)
                 {
                     actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalKanas);
@@ -215,124 +170,174 @@ int main()
                 {
                     actualKanaIndex = GetRandomValue(katakanasInitialIndex, totalKanas);
                 }
+            }
 
-                attempts++;
-
-                if (attempts == 20)
+            if (!isLearningMode)
+            {
+                if (gameTimer < 1)
                 {
                     saveChallengeData(showScoreTimer, highScores, fullScores);
                 }
-            }
-        }
 
-        else if (isLearningMode && !isHighScoreScreen)
-        {
-            if (IsKeyPressed(KEY_SPACE))
-            {
-                actualKanaName.pop_back();
-                toLowerCase(actualKanaName);
-
-                int actualInitialIndex = hiraganasInitialIndex;
-
-                if (!isHiraganaMode)
+                if (IsKeyPressed(KEY_SPACE))
                 {
-                    actualInitialIndex = katakanasInitialIndex;
-                }
+                    // removing the last character, that is always a blank space.
+                    actualKanaName.pop_back();
+                    // always converting to lower case, in case anyone writes in uppercase.
+                    toLowerCase(actualKanaName);
 
-                for (int i = actualInitialIndex; i < totalKanas + 1; i++)
-                {
-                    if (kanas[i].name.compare(actualKanaName) == 0)
+                    if (actualKana.name.compare(actualKanaName) == 0)
                     {
-                        actualKana = kanas[i];
-                        actualKanaIndex = i;
+                        isAnswerCorrect = true;
+                        score++;
+                    }
+                    else
+                    {
+                        isAnswerCorrect = false;
+                    }
 
-                        answer[0] = '\0';
-                        letterCount = 0;
-                        break;
+                    if (!isMute)
+                    {
+                        PlaySound(actualKana.sound);
+                    }
+
+                    showMessage = true;
+
+                    // clearing the textbox array.
+                    answer[0] = '\0';
+                    letterCount = 0;
+                    previousKanaIndex = actualKanaIndex;
+                    if (isHiraganaMode)
+                    {
+                        actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalKanas);
+                    }
+                    else
+                    {
+                        actualKanaIndex = GetRandomValue(katakanasInitialIndex, totalKanas);
+                    }
+
+                    attempts++;
+
+                    if (attempts == 20)
+                    {
+                        saveChallengeData(showScoreTimer, highScores, fullScores);
                     }
                 }
             }
 
-            if (!isMute)
+            else
             {
-                soundTimer += deltaTime;
-
-                // if (soundTimer > 0.6 && IsKeyPressed(KEY_SPACE))
-                // {
-                //     PlaySound(actualKana.sound);
-                //     soundTimer = 0;
-                // }
-            }
-
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, soundIconBounds))
-            {
-                isMute = !isMute;
-            }
-
-            else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, checkIconBounds))
-            {
-                isHiraganaMode = !isHiraganaMode;
-
-                if (isHiraganaMode)
-                {
-                    actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
-                }
-                else
-                {
-                    actualKanaIndex = GetRandomValue(katakanasInitialIndex, kanas.size() - 1);
-                }
-
                 if (!isMute)
                 {
-                    Kana nextKana = kanas[actualKanaIndex];
-                    PlaySound(nextKana.sound);
+                    soundTimer += deltaTime;
+                }
+
+                if (IsKeyPressed(KEY_SPACE))
+                {
+                    if (soundTimer > 0.6)
+                    {
+                        PlaySound(actualKana.sound);
+                        soundTimer = 0;
+                    }
+
+                    actualKanaName.pop_back();
+                    toLowerCase(actualKanaName);
+
+                    int actualInitialIndex = hiraganasInitialIndex;
+
+                    if (!isHiraganaMode)
+                    {
+                        actualInitialIndex = katakanasInitialIndex;
+                    }
+
+                    for (int i = actualInitialIndex; i < totalKanas + 1; i++)
+                    {
+                        if (kanas[i].name.compare(actualKanaName) == 0)
+                        {
+                            actualKana = kanas[i];
+                            actualKanaIndex = i;
+
+                            answer[0] = '\0';
+                            letterCount = 0;
+                            break;
+                        }
+                    }
+                }
+
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, soundIconBounds))
+                {
+                    isMute = !isMute;
+                }
+
+                else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, checkIconBounds))
+                {
+                    isHiraganaMode = !isHiraganaMode;
+
+                    if (isHiraganaMode)
+                    {
+                        actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
+                    }
+                    else
+                    {
+                        actualKanaIndex = GetRandomValue(katakanasInitialIndex, kanas.size() - 1);
+                    }
+
+                    if (!isMute)
+                    {
+                        Kana nextKana = kanas[actualKanaIndex];
+                        PlaySound(nextKana.sound);
+                    }
+                }
+
+                else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, highScoreIconBounds))
+                {
+                    isHighScoreScreen = true;
+                }
+
+                if (IsKeyPressed(KEY_RIGHT))
+                {
+                    actualKanaIndex++;
+
+                    if (isHiraganaMode && actualKanaIndex > totalKanas)
+                    {
+                        actualKanaIndex = hiraganasInitialIndex;
+                    }
+                    else if (!isHiraganaMode && actualKanaIndex > totalKanas)
+                    {
+                        actualKanaIndex = katakanasInitialIndex;
+                    }
+
+                    if (!isMute)
+                    {
+                        Kana nextKana = kanas[actualKanaIndex];
+                        PlaySound(nextKana.sound);
+                    }
+                }
+
+                else if (IsKeyPressed(KEY_LEFT))
+                {
+                    actualKanaIndex--;
+
+                    if (isHiraganaMode && actualKanaIndex < hiraganasInitialIndex)
+                    {
+                        actualKanaIndex = totalKanas;
+                    }
+                    else if (!isHiraganaMode && actualKanaIndex < katakanasInitialIndex)
+                    {
+                        actualKanaIndex = totalKanas;
+                    }
+
+                    if (!isMute)
+                    {
+                        Kana nextKana = kanas[actualKanaIndex];
+                        PlaySound(nextKana.sound);
+                    }
                 }
             }
-
-            else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, highScoreIconBounds))
-            {
-                isHighScoreScreen = true;
-            }
-
-            if (IsKeyPressed(KEY_RIGHT))
-            {
-                actualKanaIndex++;
-
-                if (isHiraganaMode && actualKanaIndex > totalKanas)
-                {
-                    actualKanaIndex = hiraganasInitialIndex;
-                }
-                else if (!isHiraganaMode && actualKanaIndex > totalKanas)
-                {
-                    actualKanaIndex = katakanasInitialIndex;
-                }
-
-                if (!isMute)
-                {
-                    Kana nextKana = kanas[actualKanaIndex];
-                    PlaySound(nextKana.sound);
-                }
-            }
-
-            else if (IsKeyPressed(KEY_LEFT))
-            {
-                actualKanaIndex--;
-
-                if (isHiraganaMode && actualKanaIndex < hiraganasInitialIndex)
-                {
-                    actualKanaIndex = totalKanas;
-                }
-                else if (!isHiraganaMode && actualKanaIndex < katakanasInitialIndex)
-                {
-                    actualKanaIndex = totalKanas;
-                }
-
-                if (!isMute)
-                {
-                    Kana nextKana = kanas[actualKanaIndex];
-                    PlaySound(nextKana.sound);
-                }
-            }
+        }
+        else
+        {
+            handleHighScoreScreenUI(mouseBounds, answer, letterCount);
         }
 
         BeginDrawing();
@@ -341,7 +346,6 @@ int main()
 
         if (isHighScoreScreen)
         {
-            handleHighScoreScreenUI(mouseBounds, answer, letterCount);
             drawHighScoreScreen(fullScores);
         }
 
@@ -363,7 +367,7 @@ int main()
                 drawLearningScreen(showScoreTimer, deltaTime);
             }
 
-            else 
+            else
             {
                 drawChallengeScreen(deltaTime);
             }
