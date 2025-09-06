@@ -10,18 +10,9 @@ const int MAX_GAME_TIME = 60;
 
 float gameTimer = MAX_GAME_TIME;
 
-bool isMute = false;
-
 int score = 0;
 
 int highScore = 0;
-
-int actualKanaIndex = 0;
-int previousKanaIndex = 0;
-
-bool isAnswerCorrect = false;
-bool isHiraganaMode = true;
-bool isHighScoreScreen = false;
 
 float showMessageTimer = 0;
 bool showMessage = false;
@@ -52,13 +43,13 @@ void toLowerCase(string &string);
 
 void drawHighScoreScreen(vector<HighScore> &fullScores);
 
-void drawChallengeScreen(float deltaTime);
+void drawChallengeScreen(float deltaTime, bool isAnswerCorrect, string &previousKanaName);
 
 void drawTextBox(char answer[4], int &textBoxFrameCounter, int letterCount);
 
-void drawLearningScreen(float &showScoreTimer, float deltaTime);
+void drawLearningScreen(float &showScoreTimer, float deltaTime, bool isMute, bool isHiraganaMode);
 
-void handleHighScoreScreenUI(const Rectangle &mouseBounds, char answer[4], int &letterCount);
+void handleHighScoreScreenUI(const Rectangle &mouseBounds, char answer[4], int &letterCount, bool &isHighScoreScreen);
 
 void saveChallengeData(float &showScoreTimer, vector<string> &highScores, vector<HighScore> &fullScores);
 
@@ -87,6 +78,8 @@ int main()
 
     playerName = loadPlayerName();
 
+    bool isHighScoreScreen = false;
+
     if (playerName.compare("aaa") == 0)
     {
         isHighScoreScreen = true;
@@ -99,6 +92,8 @@ int main()
     // need to explicitly define local variable values, if not I'll get a segmentation fault.
     float soundTimer = 0;
     float showScoreTimer = 5;
+    bool isMute = false;
+    bool isAnswerCorrect = false;
 
     InitAudioDevice();
 
@@ -117,7 +112,10 @@ int main()
 
     int katakanasInitialIndex = totalHiraganas + 1;
 
-    actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
+    int actualKanaIndex = GetRandomValue(hiraganasInitialIndex, totalHiraganas);
+    int previousKanaIndex = 0;
+
+    bool isHiraganaMode = true;
 
     Rectangle mouseBounds = {0, 0, 8, 8};
 
@@ -134,7 +132,7 @@ int main()
         {
             totalKanas = totalHiraganas;
         }
-        
+
         Kana actualKana = kanas[actualKanaIndex];
 
         float deltaTime = GetFrameTime();
@@ -337,7 +335,7 @@ int main()
         }
         else
         {
-            handleHighScoreScreenUI(mouseBounds, answer, letterCount);
+            handleHighScoreScreenUI(mouseBounds, answer, letterCount, isHighScoreScreen);
         }
 
         BeginDrawing();
@@ -364,12 +362,12 @@ int main()
 
             if (isLearningMode)
             {
-                drawLearningScreen(showScoreTimer, deltaTime);
+                drawLearningScreen(showScoreTimer, deltaTime, isMute, isHiraganaMode);
             }
-
             else
             {
-                drawChallengeScreen(deltaTime);
+                Kana previousKana = kanas[previousKanaIndex];
+                drawChallengeScreen(deltaTime, isAnswerCorrect, previousKana.name);
             }
         }
 
@@ -452,7 +450,7 @@ void saveChallengeData(float &showScoreTimer, vector<string> &highScores, vector
     }
 }
 
-void handleHighScoreScreenUI(const Rectangle &mouseBounds, char answer[4], int &letterCount)
+void handleHighScoreScreenUI(const Rectangle &mouseBounds, char answer[4], int &letterCount, bool &isHighScoreScreen)
 {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, backIconBounds))
     {
@@ -476,11 +474,14 @@ void handleHighScoreScreenUI(const Rectangle &mouseBounds, char answer[4], int &
     }
 }
 
-void drawLearningScreen(float &showScoreTimer, float deltaTime)
+void drawLearningScreen(float &showScoreTimer, float deltaTime, bool isMute, bool isHiraganaMode)
 {
+    DrawRectangleRounded(checkIconBounds, 0.3, 6, LIGHTGRAY);
+
     if (isHiraganaMode)
     {
         DrawText("Hiragana mode", 110, 10, 24, LIGHTGRAY);
+        DrawTexture(checkIconTexture, checkIconBounds.x, checkIconBounds.y, WHITE);
     }
     else
     {
@@ -498,22 +499,18 @@ void drawLearningScreen(float &showScoreTimer, float deltaTime)
         DrawTexture(muteIconTexture, soundIconBounds.x, soundIconBounds.y, WHITE);
     }
 
-    DrawRectangleRounded(checkIconBounds, 0.3, 6, LIGHTGRAY);
-
-    if (isHiraganaMode)
+    if (showScoreTimer < 5)
     {
-        DrawTexture(checkIconTexture, checkIconBounds.x, checkIconBounds.y, WHITE);
-    }
+        if (highScore > 0)
+        {
+            DrawText(TextFormat("High score: %i", highScore), 110, 320, 24, LIGHTGRAY);
+            showScoreTimer += deltaTime;
+        }
 
-    if (showScoreTimer < 5 && highScore > 0)
-    {
-        DrawText(TextFormat("High score: %i", highScore), 110, 320, 24, LIGHTGRAY);
-        showScoreTimer += deltaTime;
-    }
-
-    if (showScoreTimer < 5 && score > 0)
-    {
-        DrawText(TextFormat("Actual score: %i", score), 100, 360, 24, DARKGRAY);
+        if (score > 0)
+        {
+            DrawText(TextFormat("Actual score: %i", score), 100, 360, 24, DARKGRAY);
+        }
     }
 
     DrawText("SEARCH", 90, 400, 20, LIGHTGRAY);
@@ -542,7 +539,7 @@ void drawTextBox(char answer[4], int &textBoxFrameCounter, int letterCount)
     }
 }
 
-void drawChallengeScreen(float deltaTime)
+void drawChallengeScreen(float deltaTime, bool isAnswerCorrect, string &previousKanaName)
 {
     if (gameTimer > 0)
     {
@@ -566,9 +563,7 @@ void drawChallengeScreen(float deltaTime)
         else
         {
             DrawText("WRONG!", 145, 500, 20, RED);
-
-            // Kana previousKana = kanas[previousKanaIndex];
-            // DrawText(previousKana.name.c_str(), 235, 495, 25, LIME);
+            DrawText(previousKanaName.c_str(), 235, 495, 25, LIME);
         }
 
         showMessageTimer += deltaTime;
