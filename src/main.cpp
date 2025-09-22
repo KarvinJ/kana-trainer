@@ -153,7 +153,7 @@ int main()
 
         if (!isHighScoreScreen)
         {
-            if (IsKeyPressed(KEY_ENTER))
+            if (IsKeyPressed(KEY_ENTER) || (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, modeCheckIconBounds)))
             {
                 isLearningMode = !isLearningMode;
                 score = 0;
@@ -173,11 +173,6 @@ int main()
                 {
                     actualKanaIndex = GetRandomValue(katakanasInitialIndex, totalKanas);
                 }
-            }
-
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, modeCheckIconBounds))
-            {
-                isLearningMode = !isLearningMode;
             }
 
             if (!isLearningMode)
@@ -302,7 +297,10 @@ int main()
                     isHighScoreScreen = true;
                 }
 
-                if (IsKeyPressed(KEY_RIGHT))
+                Rectangle goRightBounds = {SCREEN_WIDTH / 2, 40, SCREEN_WIDTH / 2, 268};
+                Rectangle goLeftBounds = {0, 40, SCREEN_WIDTH / 2, 268};
+
+                if (IsKeyPressed(KEY_RIGHT) || (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, goRightBounds)))
                 {
                     actualKanaIndex++;
 
@@ -322,7 +320,7 @@ int main()
                     }
                 }
 
-                else if (IsKeyPressed(KEY_LEFT))
+                else if (IsKeyPressed(KEY_LEFT) || (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, goLeftBounds)))
                 {
                     actualKanaIndex--;
 
