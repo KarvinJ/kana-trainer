@@ -33,8 +33,10 @@ Rectangle soundIconBounds;
 
 Texture2D muteIconTexture;
 
-Texture2D checkIconTexture;
-Rectangle checkIconBounds;
+Texture2D modeCheckTexture;
+Rectangle modeCheckIconBounds;
+Texture2D hiraganaCheckTexture;
+Rectangle hiraganaCheckIconBounds;
 
 Texture2D highScoresIconTexture;
 Rectangle highScoreIconBounds;
@@ -65,8 +67,11 @@ int main()
 
     muteIconTexture = LoadTexture("assets/icons/mute-icon.png");
 
-    checkIconTexture = LoadTexture("assets/icons/check-icon.png");
-    checkIconBounds = {8, 10, (float)checkIconTexture.width, (float)checkIconTexture.height};
+    hiraganaCheckTexture = LoadTexture("assets/icons/check-icon.png");
+    hiraganaCheckIconBounds = {8, 10, (float)hiraganaCheckTexture.width, (float)hiraganaCheckTexture.height};
+
+    modeCheckTexture = hiraganaCheckTexture;
+    modeCheckIconBounds = {8, SCREEN_HEIGHT - 32, (float)hiraganaCheckTexture.width, (float)hiraganaCheckTexture.height};
 
     highScoresIconTexture = LoadTexture("assets/icons/high-scores-icon.png");
     highScoreIconBounds = {SCREEN_WIDTH - 32, SCREEN_HEIGHT - 32, (float)highScoresIconTexture.width, (float)highScoresIconTexture.height};
@@ -170,6 +175,11 @@ int main()
                 }
             }
 
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, modeCheckIconBounds))
+            {
+                isLearningMode = !isLearningMode;
+            }
+
             if (!isLearningMode)
             {
                 if (gameTimer < 1)
@@ -262,12 +272,12 @@ int main()
                     }
                 }
 
-                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, soundIconBounds))
+                else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, soundIconBounds))
                 {
                     isMute = !isMute;
                 }
 
-                else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, checkIconBounds))
+                else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionRecs(mouseBounds, hiraganaCheckIconBounds))
                 {
                     isHiraganaMode = !isHiraganaMode;
 
@@ -351,6 +361,13 @@ int main()
         {
             DrawRectangleRec({40, 40, 320, 268}, WHITE);
 
+            DrawRectangleRounded(modeCheckIconBounds, 0.3, 6, LIGHTGRAY);
+
+            if (isLearningMode)
+            {
+                DrawTexture(modeCheckTexture, modeCheckIconBounds.x, modeCheckIconBounds.y, WHITE);
+            }
+
             if (isHiraganaMode)
             {
                 DrawTextureRec(hiraganaSpriteSheet, actualKana.bounds, {40, 40}, WHITE);
@@ -381,7 +398,7 @@ int main()
     UnloadTexture(muteIconTexture);
     UnloadTexture(muteIconTexture);
     UnloadTexture(soundIconTexture);
-    UnloadTexture(checkIconTexture);
+    UnloadTexture(hiraganaCheckTexture);
     UnloadTexture(highScoresIconTexture);
     UnloadTexture(backIconTexture);
 
@@ -476,12 +493,12 @@ void handleHighScoreScreenUI(const Rectangle &mouseBounds, char answer[4], int &
 
 void drawLearningScreen(float &showScoreTimer, float deltaTime, bool isMute, bool isHiraganaMode)
 {
-    DrawRectangleRounded(checkIconBounds, 0.3, 6, LIGHTGRAY);
+    DrawRectangleRounded(hiraganaCheckIconBounds, 0.3, 6, LIGHTGRAY);
 
     if (isHiraganaMode)
     {
         DrawText("Hiragana mode", 110, 10, 24, LIGHTGRAY);
-        DrawTexture(checkIconTexture, checkIconBounds.x, checkIconBounds.y, WHITE);
+        DrawTexture(hiraganaCheckTexture, hiraganaCheckIconBounds.x, hiraganaCheckIconBounds.y, WHITE);
     }
     else
     {
