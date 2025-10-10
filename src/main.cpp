@@ -237,12 +237,6 @@ int main()
 
                 if (IsKeyPressed(KEY_SPACE))
                 {
-                    if (soundTimer > 0.6)
-                    {
-                        PlaySound(actualKana.sound);
-                        soundTimer = 0;
-                    }
-
                     actualKanaName.pop_back();
                     toLowerCase(actualKanaName);
 
@@ -264,6 +258,12 @@ int main()
                             letterCount = 0;
                             break;
                         }
+                    }
+
+                    if (soundTimer > 0.6)
+                    {
+                        PlaySound(actualKana.sound);
+                        soundTimer = 0;
                     }
                 }
 
